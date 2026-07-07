@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전시실</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:"Gowun Batang","Batang","Noto Serif KR",serif;
+    background:#efe5d0; color:#3a2c1e; min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .room { max-width:520px; width:100%; text-align:center; }
+  h1 { font-size:28px; letter-spacing:.3em; margin-bottom:8px; }
+  .sub { font-size:13px; color:#7a6448; margin-bottom:36px; letter-spacing:.08em; }
+  a.piece {
+    display:block; background:#fbf6ea; border:1px solid #8a7354;
+    outline:3px double #8a7354; outline-offset:-8px;
+    padding:26px 20px; margin-bottom:16px; text-decoration:none; color:#3a2c1e;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  a.piece:hover { transform:translateY(-4px); box-shadow:0 8px 20px rgba(58,44,30,.25); }
+  a.piece .title { font-size:18px; font-weight:700; letter-spacing:.06em; }
+  a.piece .desc { font-size:12.5px; color:#7a6448; margin-top:8px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="room">
+  <h1>전시실</h1>
+  <p class="sub">글을 쓰고 살아갑니다 — 프놈펜에서</p>
+  <a class="piece" href="joan.html">
+    <span class="title">내가 생각하는 잔 다르크는?</span>
+    <span class="desc">생각학교 2026 · 3쿼터 특별클래스<br>조지 버나드 쇼 『성 조앤』 사전 활동</span>
+  </a>
+</div>
+</body>
+</html>
