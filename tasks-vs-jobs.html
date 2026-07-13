@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>과제인가, 직업인가 — AI 자동화 앞에서</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --paper:#f4ecdc; --card:#fbf6ea; --ink:#3a2c1e; --ink2:#4a3a28;
+    --line:#8a7354; --line-soft:#c8b895; --muted:#7a6448; --faint:#95815f;
+    --red:#8f2f1e; --green:#4a6a3a;
+  }
+  html{ background:var(--paper); }
+  body {
+    font-family:"Gowun Batang","Batang","Noto Serif KR",serif;
+    background:var(--paper); color:var(--ink);
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    line-height:1.6; letter-spacing:0.01em;
+  }
+  .sheet{ max-width:840px; margin:0 auto; padding:36px 30px 60px; }
+
+  header{ text-align:center; padding-bottom:20px; border-bottom:2px solid var(--line); }
+  .kicker{ font-size:12px; letter-spacing:0.3em; color:var(--muted); margin-bottom:10px; }
+  header h1{ font-size:30px; font-weight:700; letter-spacing:0.04em; line-height:1.3; }
+  header .lead{ font-size:14px; color:var(--muted); margin-top:12px; letter-spacing:0.06em; }
+
+  section{ margin-top:34px; }
+  .sec-num{ display:inline-block; font-size:13px; color:var(--red); font-weight:700; letter-spacing:0.15em; }
+  .sec-title{ font-size:20px; font-weight:700; margin:4px 0 14px; letter-spacing:0.03em; }
+  p.body{ font-size:15px; color:var(--ink2); }
+  .em{ color:var(--red); font-weight:700; }
+
+  /* 재구성 박스 */
+  .reframe{ display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:stretch; margin-top:8px; }
+  .box{ background:var(--card); border:1px solid var(--line); outline:2px double var(--line); outline-offset:-6px; padding:20px 18px; }
+  .box h4{ font-size:13px; letter-spacing:0.12em; margin-bottom:8px; }
+  .box.fear h4{ color:var(--muted); }
+  .box.power h4{ color:var(--red); }
+  .box .q{ font-size:15.5px; font-weight:700; line-height:1.5; }
+  .box .tag{ display:inline-block; font-size:11px; margin-top:12px; padding:3px 9px; border-radius:20px; }
+  .box.fear .tag{ background:#e9ddc4; color:var(--muted); }
+  .box.power .tag{ background:#f0d9c9; color:var(--red); }
+  .arrow{ display:flex; align-items:center; font-size:26px; color:var(--line); }
+
+  /* 3단계 */
+  .steps{ counter-reset:step; }
+  .step{ display:flex; gap:16px; padding:16px 0; border-bottom:1px dashed var(--line-soft); }
+  .step:last-child{ border-bottom:none; }
+  .step .n{ flex:0 0 34px; height:34px; width:34px; border:2px solid var(--red); color:var(--red);
+    border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; }
+  .step .txt h5{ font-size:16px; font-weight:700; margin-bottom:4px; }
+  .step .txt p{ font-size:14px; color:var(--ink2); }
+  .step .txt .ask{ color:var(--red); font-style:italic; }
+
+  /* 워크시트 */
+  .worksheet{ background:var(--card); border:1px solid var(--line); padding:20px; margin-top:14px; }
+  .worksheet .row{ display:flex; align-items:center; gap:10px; margin:8px 0; }
+  .worksheet .mark{ flex:0 0 90px; font-size:12px; color:var(--muted); }
+  .worksheet input[type=text]{ flex:1; border:none; border-bottom:1px solid var(--line-soft);
+    background:transparent; font-family:inherit; font-size:14px; color:var(--ink); padding:5px 4px; }
+  .worksheet input[type=text]:focus{ outline:none; border-bottom-color:var(--red); }
+  .toggle{ flex:0 0 auto; display:flex; gap:6px; }
+  .toggle button{ font-family:inherit; cursor:pointer; border:1px solid var(--line); background:var(--paper);
+    width:30px; height:28px; font-size:14px; border-radius:5px; }
+  .toggle button.on-auto{ background:#e9ddc4; border-color:var(--muted); }
+  .toggle button.on-human{ background:#dfe8d5; border-color:var(--green); color:var(--green); }
+  .ws-hint{ font-size:12px; color:var(--faint); margin-top:10px; }
+
+  /* 예시 카드 */
+  .examples{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:8px; }
+  .ex{ background:var(--card); border:1px solid var(--line); padding:16px 15px; cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease; }
+  .ex:hover{ transform:translateY(-2px); box-shadow:0 4px 14px rgba(58,44,30,.16); }
+  .ex h5{ font-size:15px; font-weight:700; margin-bottom:8px; }
+  .ex .row2{ font-size:12.5px; margin:5px 0; }
+  .ex .lab{ color:var(--muted); }
+  .ex .auto{ color:var(--muted); }
+  .ex .human{ color:var(--green); font-weight:700; }
+  .ex .reveal{ font-size:12.5px; color:var(--ink2); margin-top:10px; padding-top:10px;
+    border-top:1px dashed var(--line-soft); display:none; line-height:1.55; }
+  .ex.open .reveal{ display:block; }
+  .ex .more{ font-size:11px; color:var(--red); margin-top:8px; }
+
+  /* 인용 */
+  blockquote{ background:var(--card); border-left:4px solid var(--red); padding:16px 20px; margin-top:8px;
+    font-size:15px; line-height:1.6; }
+  blockquote .who{ display:block; font-size:12px; color:var(--muted); margin-top:8px; letter-spacing:0.06em; }
+
+  /* 학자 지도 */
+  .scholars{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px; }
+  .col{ background:var(--card); border:1px solid var(--line); padding:16px; }
+  .col h5{ font-size:14px; letter-spacing:0.08em; padding-bottom:8px; border-bottom:1px solid var(--line-soft); margin-bottom:10px; }
+  .col.warn h5{ color:var(--red); }
+  .col.opt h5{ color:var(--green); }
+  .col ul{ list-style:none; }
+  .col li{ font-size:13px; margin:8px 0; color:var(--ink2); }
+  .col li b{ color:var(--ink); }
+
+  /* 디퍼 브리지 */
+  .bridge{ background:#efe6d0; border:1px solid var(--line); outline:2px double var(--line);
+    outline-offset:-6px; padding:22px 22px; margin-top:8px; text-align:center; }
+  .bridge p{ font-size:16px; font-weight:700; line-height:1.6; }
+  .bridge .sub{ font-size:13px; font-weight:400; color:var(--muted); margin-top:10px; }
+
+  footer{ text-align:center; margin-top:44px; padding-top:18px; border-top:2px solid var(--line);
+    font-size:12px; color:var(--muted); letter-spacing:0.08em; }
+
+  .print-btn{ position:fixed; top:16px; right:16px; font-family:inherit; cursor:pointer;
+    background:var(--red); color:#fff; border:none; padding:10px 16px; border-radius:6px; font-size:13px;
+    box-shadow:0 3px 10px rgba(0,0,0,.2); }
+
+  @media print{
+    .print-btn{ display:none; }
+    .ex .reveal{ display:block !important; }
+    .ex .more{ display:none; }
+    body{ font-size:12px; }
+    .sheet{ max-width:none; padding:0; }
+    section{ margin-top:20px; page-break-inside:avoid; }
+    .ex:hover{ transform:none; box-shadow:none; }
+  }
+  @media (max-width:680px){
+    .reframe{ grid-template-columns:1fr; } .arrow{ justify-content:center; transform:rotate(90deg); }
+    .examples{ grid-template-columns:1fr; } .scholars{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">🖨 인쇄 / PDF</button>
+<div class="sheet">
+
+  <header>
+    <div class="kicker">디퍼 언브랜딩 살롱 · 우유니 사막 조 토론</div>
+    <h1>과제인가, 직업인가<br>— AI 자동화 앞에서</h1>
+    <p class="lead">레이 커즈와일 『마침내 특이점이 시작된다』 5장 「일자리의 미래: 좋은 쪽 혹은 나쁜 쪽」에서</p>
+  </header>
+
+  <section>
+    <span class="sec-num">여는 생각</span>
+    <div class="sec-title">두려움은 '직업' 단위에서 오고, 힘은 '과제' 단위에서 생긴다</div>
+    <p class="body">직업(job)은 여러 과제(task)의 묶음이다. 자동화는 직업을 통째로 지우기보다, 그 안의 <span class="em">과제 몇 개</span>만 가져간다. 그래서 같은 사실을 어느 단위로 보느냐에 따라, 나는 피해자가 되기도 하고 운전자가 되기도 한다.</p>
+    <div class="reframe">
+      <div class="box fear">
+        <h4>직업 단위로 보면</h4>
+        <div class="q">"AI가 내 일을 없앤다."</div>
+        <span class="tag">→ 손 쓸 수 없음 · 두려움</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="box power">
+        <h4>과제 단위로 보면</h4>
+        <div class="q">"어떤 과제가 자동화되고,<br>나는 어떤 과제로 옮겨갈까?"</div>
+        <span class="tag">→ 선택할 수 있음 · 계획</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="sec-num">함께 해볼 것 · 3단계</span>
+    <div class="sec-title">내 일을 다시 들여다보기</div>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div class="txt">
+        <h5>쪼개기</h5>
+        <p>내 직업을 <b>과제 목록</b>으로 적어본다. <span class="ask">"나는 하루에 실제로 어떤 일들을 하나요?"</span></p>
+      </div></div>
+      <div class="step"><div class="n">2</div><div class="txt">
+        <h5>표시하기</h5>
+        <p>AI가 가져갈 것 같은 과제엔 ⚙, 사람이 계속 해야 할 과제엔 ✿. <span class="ask">"생각보다 ✿가 많지 않나요?"</span></p>
+      </div></div>
+      <div class="step"><div class="n">3</div><div class="txt">
+        <h5>옮겨가기</h5>
+        <p>⚙가 걷어가면 남는 시간에 어떤 ✿를 <b>더</b> 할 수 있을까. <span class="ask">"두려움이 계획으로 바뀌는 자리."</span></p>
+      </div></div>
+    </div>
+
+    <div class="worksheet">
+      <div class="row"><span class="mark">내 과제</span>
+        <input type="text" placeholder="예: 단어 뜻 설명하기 / 채점 / 상담 …">
+        <span class="toggle"><button onclick="tog(this,'auto')" title="AI가 가져갈 과제">⚙</button><button onclick="tog(this,'human')" title="사람이 할 과제">✿</button></span></div>
+      <div class="row"><span class="mark">내 과제</span>
+        <input type="text" placeholder="">
+        <span class="toggle"><button onclick="tog(this,'auto')">⚙</button><button onclick="tog(this,'human')">✿</button></span></div>
+      <div class="row"><span class="mark">내 과제</span>
+        <input type="text" placeholder="">
+        <span class="toggle"><button onclick="tog(this,'auto')">⚙</button><button onclick="tog(this,'human')">✿</button></span></div>
+      <div class="row"><span class="mark">내 과제</span>
+        <input type="text" placeholder="">
+        <span class="toggle"><button onclick="tog(this,'auto')">⚙</button><button onclick="tog(this,'human')">✿</button></span></div>
+      <p class="ws-hint">⚙ 자동화될 과제 · ✿ 나만 할 수 있는 과제 — 버튼을 눌러 표시해 보세요. (인쇄본에서는 손으로 적습니다)</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="sec-num">현실의 예 · 눌러서 펼치기</span>
+    <div class="sec-title">과제는 자동화돼도, 직업은 형태를 바꿔 남는다</div>
+    <div class="examples">
+      <div class="ex" onclick="this.classList.toggle('open')">
+        <h5>은행 창구 직원</h5>
+        <div class="row2"><span class="lab">⚙ 자동화:</span> <span class="auto">현금 세기 (ATM)</span></div>
+        <div class="row2"><span class="lab">✿ 옮겨간 과제:</span> <span class="human">상담·상품 판매</span></div>
+        <div class="more">＋ 무슨 일이 있었나</div>
+        <div class="reveal">ATM이 퍼지자 지점 운영비가 싸져 은행이 지점을 더 열었고, 직원 수는 오히려 늘었다. '돈 세는 사람'이 '관계 맺는 사람'으로 바뀌었을 뿐.</div>
+      </div>
+      <div class="ex" onclick="this.classList.toggle('open')">
+        <h5>번역가</h5>
+        <div class="row2"><span class="lab">⚙ 자동화:</span> <span class="auto">초벌 번역</span></div>
+        <div class="row2"><span class="lab">✿ 옮겨간 과제:</span> <span class="human">뉘앙스·문화 판단</span></div>
+        <div class="more">＋ 무슨 일이 있었나</div>
+        <div class="reveal">기계가 초안을 내면, 번역가의 일은 '옮기기'에서 다듬고 책임지는 '판단'으로 이동한다. 이 단어가 이 상황에 맞는지는 여전히 사람의 몫.</div>
+      </div>
+      <div class="ex" onclick="this.classList.toggle('open')">
+        <h5>한국어 교사</h5>
+        <div class="row2"><span class="lab">⚙ 자동화:</span> <span class="auto">문법 설명·채점</span></div>
+        <div class="row2"><span class="lab">✿ 옮겨간 과제:</span> <span class="human">동기·관계·판단</span></div>
+        <div class="more">＋ 무슨 일이 있었나</div>
+        <div class="reveal">반복 과제를 기계가 걷어가면, 교사는 학생의 막힌 지점을 알아채고 살아 있는 관계 속에서 가르치는, 사람만의 과제에 더 집중하게 된다.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="sec-num">두 진영의 목소리</span>
+    <div class="sec-title">"이번엔 다르다" vs "이번에도 결국 풍요로워진다"</div>
+    <div class="scholars">
+      <div class="col warn">
+        <h5>⚠ 경고하는 쪽</h5>
+        <ul>
+          <li><b>케인스</b> — '기술적 실업'을 처음 이름 붙임.</li>
+          <li><b>레온티예프</b> — 자동차가 말을 밀어냈듯 기계가 인간을 밀어낼 수 있다.</li>
+          <li><b>프레이 &amp; 오스본</b> — 미국 일자리의 약 47%가 자동화 위험(2013, 옥스퍼드).</li>
+          <li><b>마틴 포드</b> — 이번엔 새 일자리가 그만큼 생기지 않는다(『로봇의 부상』).</li>
+        </ul>
+      </div>
+      <div class="col opt">
+        <h5>✿ 신중·낙관하는 쪽</h5>
+        <ul>
+          <li><b>데이비드 오터</b> — 자동화는 노동을 없애기도, <b>보완</b>하기도 한다(과제 단위로 보라).</li>
+          <li><b>브린욜프슨 &amp; 맥아피</b> — 총량보다 '분배'가 문제(『제2의 기계 시대』).</li>
+          <li><b>커즈와일</b> — 러다이트 이래 종말 예측은 번번이 빗나갔다. 일자리는 사라지지 않고 모습을 바꾼다.</li>
+        </ul>
+      </div>
+    </div>
+    <blockquote>
+      과제와 직업을 구별하는 것이 중요하다. 어떤 경우에 완전히 자동화된 과제는, 특정 종류의 직업이 다른 과제로 전환할 수 있게 해준다.
+      <span class="who">— 레이 커즈와일, 『마침내 특이점이 시작된다』 5장</span>
+    </blockquote>
+  </section>
+
+  <section>
+    <span class="sec-num">디퍼로 잇기</span>
+    <div class="sec-title">그래서 왜 '나만의 원천'인가</div>
+    <div class="bridge">
+      <p>AI가 가져가는 건 '누구나 하는 과제'다.<br>나에게 남는 건 나만의 흔적 — 원천이다.</p>
+      <p class="sub">AI 시대에 안전한 건 '직업'이 아니라 '대체 불가능한 과제'이고,<br>그 과제는 대개 당신의 원천에서 나온다.</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="sec-num">토론 질문</span>
+    <div class="sec-title">우리 조가 함께 이야기할 것</div>
+    <div class="steps">
+      <div class="step"><div class="n">Q1</div><div class="txt"><p>내 일에서 <b>가장 먼저 자동화될 과제</b>는 무엇일까? 그게 사라지면 나는 무엇이 아쉬울까, 아니면 홀가분할까?</p></div></div>
+      <div class="step"><div class="n">Q2</div><div class="txt"><p>내 일에서 <b>절대 기계에 넘기고 싶지 않은 과제</b> 하나는? 그건 왜 나만 할 수 있다고 느끼나?</p></div></div>
+      <div class="step"><div class="n">Q3</div><div class="txt"><p>그 '나만의 과제'를 나의 <b>원천·씨앗</b>과 이어보면, 어떤 문장이 나오나?</p></div></div>
+    </div>
+  </section>
+
+  <footer>디퍼 언브랜딩 살롱 · 우유니 사막 조 · 별지기 스티븐스 &amp; 햇살 &nbsp;|&nbsp; 2026</footer>
+
+</div>
+<script>
+  function tog(btn, kind){
+    var group = btn.parentElement.querySelectorAll('button');
+    var wasOn = btn.classList.contains(kind === 'auto' ? 'on-auto' : 'on-human');
+    group.forEach(function(b){ b.classList.remove('on-auto','on-human'); });
+    if(!wasOn){ btn.classList.add(kind === 'auto' ? 'on-auto' : 'on-human'); }
+  }
+</script>
+</body>
+</html>
