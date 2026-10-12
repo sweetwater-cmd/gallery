@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>냉장고 비우기 — 식비 절약 레시피</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:dark;
+    --bg:#0e1b30; --card:#172b46; --ink:#e9eef7; --ink-soft:#b3c2d8; --muted:#7d8caa;
+    --line:#2c3e5b; --line-soft:#213450;
+    --green:#3fae7c; --green-soft:#163a2c; --green-ink:#74d6a3;
+    --amber:#e2a44d; --amber-soft:#3a2d14; --amber-ink:#f1c67c;
+    --red:#e26a5b; --red-soft:#3a1e1a; --red-ink:#f29a8d;
+    --accent:#2f9f6b; --chip:#1f3454;
+    --serif:'Gowun Batang',serif; --sans:'Noto Sans KR',sans-serif;
+    --shadow:0 1px 3px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.55;
+       -webkit-font-smoothing:antialiased;padding-bottom:76px}
+  h1,h2,h3{font-family:var(--serif);margin:0;font-weight:700;letter-spacing:-.3px}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select{font-family:inherit;font-size:15px;color:var(--ink)}
+  .app{max-width:540px;margin:0 auto;min-height:100vh;background:var(--bg)}
+
+  /* ===== Header ===== */
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:18px 18px 14px;position:sticky;top:0;z-index:30}
+  header .hbar{display:flex;align-items:center;gap:14px;justify-content:space-between}
+  .fridge-ico{flex-shrink:0;width:50px;height:50px}
+  .fridge-ico svg{width:50px;height:50px;display:block;filter:drop-shadow(0 2px 5px rgba(0,0,0,.35))}
+  header .eyebrow{font-size:11px;letter-spacing:3px;color:var(--green);font-weight:700}
+  header h1{font-size:22px;margin-top:4px}
+  header .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+  /* ===== Tabs (bottom nav) ===== */
+  .tabbar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);
+          display:flex;max-width:540px;margin:0 auto;z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+  .tabbar button{flex:1;padding:9px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;
+                 font-size:10.5px;color:var(--muted);font-weight:500;position:relative}
+  .tabbar button .ic{font-size:19px;line-height:1}
+  .tabbar button.on{color:var(--accent);font-weight:700}
+  .tabbar button .badge{position:absolute;top:4px;right:50%;transform:translateX(16px);background:var(--red);
+                 color:#fff;font-size:9px;font-weight:700;min-width:15px;height:15px;border-radius:8px;
+                 display:flex;align-items:center;justify-content:center;padding:0 3px}
+
+  main{padding:16px 14px 28px}
+  .section-title{font-size:13px;font-weight:700;color:var(--ink-soft);margin:18px 2px 9px;
+                 display:flex;align-items:center;gap:6px}
+  .section-title:first-child{margin-top:4px}
+  .hint{font-size:12px;color:var(--muted);margin:2px 2px 10px}
+
+  /* ===== Cards ===== */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+
+  /* ===== Chips (ingredient quick-pick) ===== */
+  .catrow{margin-bottom:12px}
+  .catname{font-size:12px;font-weight:700;color:var(--ink-soft);margin:0 2px 6px;display:flex;align-items:center;gap:5px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{background:var(--chip);border:1px solid var(--line);border-radius:18px;padding:6px 12px;font-size:13px;
+        color:var(--ink-soft);transition:.12s;font-weight:500}
+  .chip:active{transform:scale(.94)}
+  .chip.on{background:var(--green-soft);border-color:var(--green);color:var(--green-ink);font-weight:700}
+  .chip.on::before{content:"✓ ";font-size:11px}
+
+  /* custom add row */
+  .addrow{display:flex;gap:7px;margin-top:4px}
+  .addrow input{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card)}
+  .addrow button{background:var(--accent);color:#fff;border-radius:10px;padding:0 16px;font-weight:700;font-size:14px}
+
+  /* my fridge list */
+  .ing{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--line-soft)}
+  .ing:last-child{border-bottom:none}
+  .ing .nm{font-weight:700;font-size:14.5px;flex-shrink:0}
+  .ing .meta{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+  .ing .qty{font-size:12px;color:var(--ink-soft);background:var(--chip);padding:2px 8px;border-radius:8px}
+  .ing .exp{font-size:11.5px;padding:2px 8px;border-radius:8px;font-weight:600}
+  .exp.ok{background:var(--green-soft);color:var(--green-ink)}
+  .exp.soon{background:var(--amber-soft);color:var(--amber-ink)}
+  .exp.urgent{background:var(--red-soft);color:var(--red-ink)}
+  .exp.gone{background:var(--line);color:var(--muted);text-decoration:line-through}
+  .ing .del{margin-left:auto;color:var(--muted);font-size:18px;padding:2px 6px;flex-shrink:0}
+  .ing .editbtn{color:var(--muted);font-size:14px;padding:2px 4px}
+
+  /* edit detail panel */
+  .editpanel{background:var(--line-soft);padding:12px;border-radius:10px;margin:8px 0}
+  .field{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .field label{font-size:12px;color:var(--ink-soft);width:64px;flex-shrink:0;font-weight:600}
+  .field input{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--card)}
+
+  /* ===== Filters ===== */
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+  .fbtn{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 13px;font-size:12.5px;
+        color:var(--ink-soft);font-weight:600}
+  .fbtn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* ===== Recipe card ===== */
+  .rcard{padding:14px;margin-bottom:11px;position:relative;overflow:hidden}
+  .rcard .toprow{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .rcard .emoji{font-size:30px;line-height:1}
+  .rcard h3{font-size:17px;margin-bottom:3px}
+  .rcard .tagline{font-size:12px;color:var(--muted);display:flex;gap:9px;flex-wrap:wrap;margin-top:3px}
+  .rcard .tagline b{color:var(--ink-soft);font-weight:600}
+  .star{font-size:20px;color:var(--line);flex-shrink:0;padding:2px}
+  .star.on{color:var(--amber)}
+
+  .matchbar{margin-top:11px}
+  .matchbar .lbl{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px}
+  .matchbar .lbl .pct{font-weight:700}
+  .track{height:7px;background:var(--line-soft);border-radius:4px;overflow:hidden}
+  .track .fill{height:100%;border-radius:4px;transition:width .4s}
+
+  .badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+  .b{font-size:11px;font-weight:700;padding:3px 9px;border-radius:8px}
+  .b.full{background:var(--green-soft);color:var(--green-ink)}
+  .b.near{background:var(--amber-soft);color:var(--amber-ink)}
+  .b.urgent{background:var(--red-soft);color:var(--red-ink)}
+  .b.cost{background:var(--chip);color:var(--ink-soft)}
+
+  .haverow{margin-top:11px;font-size:12.5px;line-height:1.7}
+  .haverow .lab{color:var(--muted);font-weight:600;margin-right:4px}
+  .ig{display:inline-block;padding:1px 8px;border-radius:7px;margin:2px 3px 0 0;font-size:12px}
+  .ig.has{background:var(--green-soft);color:var(--green-ink)}
+  .ig.miss{background:var(--red-soft);color:var(--red-ink)}
+  .ig.expsoon{outline:2px solid var(--amber);outline-offset:-2px}
+
+  .rcard .actions{display:flex;gap:8px;margin-top:12px}
+  .rcard .actions button{flex:1;border-radius:10px;padding:9px;font-size:13px;font-weight:700}
+  .btn-prime{background:var(--accent);color:#fff}
+  .btn-ghost{background:var(--card);border:1px solid var(--line);color:var(--ink-soft)}
+
+  /* ===== Modal (recipe detail) ===== */
+  .overlay{position:fixed;inset:0;background:rgba(40,34,26,.5);z-index:60;display:flex;align-items:flex-end;
+           justify-content:center;animation:fade .2s}
+  @keyframes fade{from{opacity:0}}
+  .sheet{background:var(--bg);width:100%;max-width:540px;max-height:92vh;border-radius:20px 20px 0 0;
+         overflow-y:auto;animation:slideup .26s cubic-bezier(.2,.8,.2,1)}
+  @keyframes slideup{from{transform:translateY(40px);opacity:.6}}
+  .sheet .shead{position:sticky;top:0;background:var(--bg);padding:16px 18px 12px;border-bottom:1px solid var(--line);
+                display:flex;justify-content:space-between;align-items:flex-start;z-index:2}
+  .sheet .shead h2{font-size:21px}
+  .sheet .closeb{font-size:26px;color:var(--muted);line-height:1;padding:0 2px}
+  .sheet .sbody{padding:16px 18px 30px}
+  .detail-tags{display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-soft);margin-top:5px}
+  .detail-tags span{background:var(--card);border:1px solid var(--line);padding:3px 10px;border-radius:9px}
+  .dsec-title{font-size:14px;font-weight:700;color:var(--accent);margin:20px 0 9px;
+              border-bottom:2px solid var(--line);padding-bottom:5px;font-family:var(--serif)}
+  .ing-line{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+  .ing-line:last-child{border-bottom:none}
+  .ing-line .price{color:var(--muted);font-size:12.5px}
+  .ing-line.miss .nm{color:var(--red-ink)}
+  .ing-line.miss .nm::after{content:" · 없음";font-size:11px;color:var(--red)}
+  .step{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:14px;line-height:1.6}
+  .step:last-child{border-bottom:none}
+  .step .n{width:23px;height:23px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;
+           font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .costbox{background:var(--green-soft);border-radius:12px;padding:14px;text-align:center;margin-top:6px}
+  .costbox .big{font-size:28px;font-weight:700;color:var(--green-ink);font-family:var(--serif)}
+  .costbox .lab{font-size:12px;color:var(--green-ink);font-weight:600}
+  .costbox .vs{font-size:12px;color:var(--ink-soft);margin-top:6px}
+
+  /* ===== Shopping list ===== */
+  .shop-item{display:flex;align-items:center;gap:11px;padding:12px;border-bottom:1px solid var(--line-soft)}
+  .shop-item:last-child{border-bottom:none}
+  .checkbox{width:22px;height:22px;border:2px solid var(--line);border-radius:6px;flex-shrink:0;
+            display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff}
+  .checkbox.on{background:var(--green);border-color:var(--green)}
+  .shop-item .nm{font-weight:600;font-size:14.5px}
+  .shop-item.done .nm{text-decoration:line-through;color:var(--muted)}
+  .shop-item .from{font-size:11px;color:var(--muted);margin-left:auto;text-align:right}
+
+  /* ===== Tracker ===== */
+  .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+  .stat{padding:15px 14px;text-align:center}
+  .stat .v{font-size:24px;font-weight:700;font-family:var(--serif);color:var(--ink)}
+  .stat .v.save{color:var(--green-ink)}
+  .stat .k{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .stat .sub{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px;font-size:13.5px}
+  .setting-row input{width:110px;text-align:right;border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+  .seg{display:flex;gap:6px;margin-bottom:12px}
+  .seg button{flex:1;padding:8px;border:1px solid var(--line);background:var(--card);border-radius:10px;
+              font-size:13px;font-weight:600;color:var(--ink-soft)}
+  .seg button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* ===== Log / records ===== */
+  .logcard{padding:0;margin-bottom:11px;overflow:hidden}
+  .logcard img{width:100%;height:170px;object-fit:cover;display:block;background:var(--line-soft)}
+  .logcard .lc-body{padding:12px 14px}
+  .logcard .lc-top{display:flex;justify-content:space-between;align-items:baseline}
+  .logcard h3{font-size:16px}
+  .logcard .date{font-size:11.5px;color:var(--muted)}
+  .logcard .memo{font-size:13.5px;color:var(--ink-soft);margin-top:6px;white-space:pre-wrap}
+  .logcard .lc-cost{font-size:12px;color:var(--green-ink);font-weight:700;margin-top:7px}
+  .logcard .lc-del{font-size:12px;color:var(--muted);margin-top:8px;text-decoration:underline}
+
+  /* empty states */
+  .empty{text-align:center;padding:46px 24px;color:var(--muted)}
+  .empty .e-ic{font-size:40px;margin-bottom:10px}
+  .empty .e-t{font-size:15px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;font-family:var(--serif)}
+  .empty .e-d{font-size:13px}
+
+  /* log form */
+  .logform .field-col{margin-bottom:12px}
+  .logform label.fl{font-size:12.5px;font-weight:700;color:var(--ink-soft);display:block;margin-bottom:5px}
+  .logform input[type=text],.logform textarea{width:100%;border:1px solid var(--line);border-radius:10px;
+            padding:10px 12px;background:var(--card);font-size:14px}
+  .logform textarea{min-height:70px;resize:vertical;font-family:inherit}
+  .photo-drop{border:2px dashed var(--line);border-radius:12px;padding:24px;text-align:center;color:var(--muted);
+              font-size:13px;background:var(--card)}
+  .photo-drop img{max-width:100%;border-radius:10px;margin-top:8px}
+  .savebtn{width:100%;background:var(--accent);color:#fff;border-radius:12px;padding:13px;font-size:15px;font-weight:700;margin-top:6px}
+
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);
+         padding:10px 18px;border-radius:22px;font-size:13px;font-weight:600;z-index:80;animation:fade .2s;
+         box-shadow:0 4px 16px rgba(0,0,0,.2)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+
+<script type="text/jsx-source" id="app-src">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ============================================================
+   재료 카테고리 (빠른 선택용)
+============================================================ */
+const CATEGORIES = [
+  { name:"채소", icon:"🥬", items:["양파","대파","마늘","당근","감자","애호박","양배추","배추","청양고추","부추","콩나물","시금치","버섯","무","오이","토마토","가지","고구마","쪽파","깻잎","숙주","피망"] },
+  { name:"육류", icon:"🥩", items:["돼지고기","소고기","닭고기","베이컨","햄","소시지","스팸"] },
+  { name:"유제품·계란", icon:"🥚", items:["계란","우유","치즈","버터"] },
+  { name:"곡류·면", icon:"🍚", items:["밥","쌀","국수","소면","라면","라면사리","떡","떡국떡","당면","우동","식빵","밀가루"] },
+  { name:"수산·기타", icon:"🐟", items:["두부","순두부","김치","김","김가루","멸치","참치캔","어묵","미역","새우","오징어","고등어","메추리알","만두"] },
+  { name:"소스·양념", icon:"🧂", items:["간장","고추장","된장","고춧가루","참기름","식용유","설탕","소금","식초","깨","굴소스","케첩","마요네즈","다진마늘","물엿","카레가루","새우젓"] },
+];
+
+/* 재료 표준화: 다진마늘=마늘 취급 등 매칭 보정 */
+const ALIAS = { "다진마늘":"마늘", "쌀":"밥" };
+const norm = (s)=> ALIAS[s] || s;
+
+/* ============================================================
+   레시피 DB (한식·아시안 20개)
+   ing: [재료명, 분량텍스트, 단가(원), 필수여부]
+   단가 = 이 요리에 쓰는 분량 기준 대략 비용
+============================================================ */
+const RECIPES = [
+  { id:1, name:"김치볶음밥", emoji:"🍳", time:15, level:"쉬움", servings:1, total:2500,
+    ing:[["밥","1공기",300],["김치","1컵",500],["계란","1개",400],["대파","약간",200],["식용유","1큰술",100],["참기름","약간",150],["간장","1작은술",100]],
+    steps:["팬에 식용유를 두르고 송송 썬 대파를 볶아 파기름을 낸다.","김치를 잘게 썰어 넣고 2~3분 볶는다.","밥을 넣고 간장으로 간하며 고슬하게 볶는다.","참기름을 두르고 그릇에 담는다.","계란프라이를 올린다."] },
+  { id:2, name:"계란말이", emoji:"🍳", time:10, level:"쉬움", servings:2, total:1400,
+    ing:[["계란","3개",1200],["대파","약간",150],["당근","약간",200],["소금","약간",30],["식용유","1큰술",100]],
+    steps:["계란을 풀고 잘게 썬 대파·당근, 소금을 넣어 섞는다.","약불 팬에 기름을 얇게 두른다.","계란물을 부어 가장자리가 익으면 돌돌 말아준다.","2~3번 나눠 부으며 두툼하게 만 뒤 한 김 식혀 썬다."] },
+  { id:3, name:"된장찌개", emoji:"🍲", time:25, level:"보통", servings:2, total:3000,
+    ing:[["된장","2큰술",400],["두부","1/2모",700],["애호박","1/4개",400],["양파","1/2개",300],["대파","약간",200],["감자","1개",400],["다진마늘","1작은술",200]],
+    steps:["냄비에 물을 붓고 된장을 풀어 끓인다.","감자·양파를 넣고 끓인다.","애호박과 두부를 넣는다.","다진마늘과 대파를 넣고 한소끔 더 끓인다."] },
+  { id:4, name:"김치찌개", emoji:"🍲", time:30, level:"보통", servings:2, total:4500,
+    ing:[["김치","2컵",800],["돼지고기","150g",2500],["두부","1/2모",700],["대파","약간",200],["고춧가루","1큰술",200],["다진마늘","1작은술",100]],
+    steps:["냄비에 돼지고기와 김치를 넣고 볶는다.","물을 붓고 고춧가루·다진마늘을 넣어 끓인다.","중불에서 15분간 푹 끓인다.","두부와 대파를 넣고 한소끔 더 끓인다."] },
+  { id:5, name:"제육볶음", emoji:"🥘", time:25, level:"보통", servings:2, total:4000,
+    ing:[["돼지고기","250g",3000],["고추장","2큰술",300],["고춧가루","1큰술",200],["양파","1/2개",300],["대파","약간",200],["다진마늘","1큰술",100],["설탕","1큰술",50],["간장","1큰술",100],["참기름","약간",150]],
+    steps:["고추장·고춧가루·간장·설탕·다진마늘로 양념장을 만든다.","돼지고기에 양념을 버무려 10분 재운다.","센 불에 고기를 볶다가 양파를 넣는다.","대파와 참기름을 넣고 마무리한다."] },
+  { id:6, name:"콩나물국", emoji:"🍜", time:20, level:"쉬움", servings:2, total:1500,
+    ing:[["콩나물","1봉",800],["대파","약간",200],["다진마늘","1작은술",100],["소금","약간",30],["멸치","한 줌",400]],
+    steps:["냄비에 물과 멸치를 넣고 육수를 우린다.","멸치를 건지고 콩나물을 넣어 뚜껑 덮고 끓인다.","다진마늘과 소금으로 간한다.","대파를 넣고 마무리한다."] },
+  { id:7, name:"두부조림", emoji:"🥘", time:20, level:"쉬움", servings:2, total:1800,
+    ing:[["두부","1모",1300],["간장","2큰술",150],["고춧가루","1큰술",200],["대파","약간",200],["다진마늘","1작은술",100],["설탕","1작은술",50],["식용유","1큰술",100]],
+    steps:["두부를 도톰하게 썰어 기름에 노릇하게 굽는다.","간장·고춧가루·설탕·다진마늘로 양념장을 만든다.","구운 두부에 양념을 끼얹고 약불로 졸인다.","대파를 올려 마무리한다."] },
+  { id:8, name:"어묵볶음", emoji:"🥘", time:15, level:"쉬움", servings:2, total:2000,
+    ing:[["어묵","2장",1000],["양파","1/2개",300],["당근","약간",200],["간장","1큰술",100],["설탕","1작은술",50],["식용유","1큰술",100],["참기름","약간",150]],
+    steps:["어묵을 먹기 좋게 썬다.","팬에 기름을 두르고 양파·당근을 볶는다.","어묵을 넣고 간장·설탕으로 간한다.","참기름을 둘러 마무리한다."] },
+  { id:9, name:"잔치국수", emoji:"🍜", time:25, level:"보통", servings:2, total:2800,
+    ing:[["국수","2인분",800],["멸치","한 줌",400],["애호박","1/4개",400],["계란","1개",400],["김","약간",200],["간장","1큰술",100]],
+    steps:["멸치로 육수를 우려 간장으로 간한다.","국수를 삶아 찬물에 헹군다.","애호박은 채 썰어 볶고, 계란은 지단을 부친다.","그릇에 국수를 담고 육수를 부은 뒤 고명을 올린다."] },
+  { id:10, name:"비빔밥", emoji:"🍚", time:30, level:"보통", servings:1, total:3500,
+    ing:[["밥","1공기",300],["당근","약간",300],["애호박","1/4개",400],["콩나물","한 줌",400],["시금치","한 줌",500],["계란","1개",400],["고추장","1큰술",150],["참기름","약간",150]],
+    steps:["당근·애호박은 채 썰어 볶고, 콩나물·시금치는 데쳐 무친다.","계란프라이를 부친다.","그릇에 밥을 담고 나물을 색색이 올린다.","고추장과 참기름을 넣고 비벼 먹는다."] },
+  { id:11, name:"떡볶이", emoji:"🍢", time:20, level:"쉬움", servings:2, total:3000,
+    ing:[["떡","300g",1500],["고추장","2큰술",300],["고춧가루","1큰술",200],["어묵","2장",1000],["대파","약간",200],["설탕","1큰술",50]],
+    steps:["냄비에 물과 고추장·고춧가루·설탕을 풀어 끓인다.","떡과 어묵을 넣는다.","중불에서 떡이 말랑해질 때까지 졸인다.","대파를 넣고 마무리한다."] },
+  { id:12, name:"김치전", emoji:"🥞", time:15, level:"쉬움", servings:2, total:2200,
+    ing:[["김치","1.5컵",600],["밀가루","1컵",500],["계란","1개",400],["대파","약간",200],["식용유","넉넉히",150]],
+    steps:["김치를 잘게 썰어 밀가루·계란·물과 반죽한다.","대파를 넣어 섞는다.","팬에 기름을 넉넉히 두르고 반죽을 펴 부친다.","앞뒤로 노릇하게 부친다."] },
+  { id:13, name:"볶음우동", emoji:"🍜", time:15, level:"쉬움", servings:1, total:2600,
+    ing:[["우동","1인분",900],["양배추","2장",400],["당근","약간",200],["양파","1/4개",200],["굴소스","1큰술",300],["간장","1작은술",100],["식용유","1큰술",100]],
+    steps:["우동면을 데쳐 둔다.","팬에 기름을 두르고 양배추·당근·양파를 볶는다.","우동면을 넣고 굴소스·간장으로 간한다.","센 불에 빠르게 볶아 완성한다."] },
+  { id:14, name:"계란볶음밥", emoji:"🍳", time:12, level:"쉬움", servings:1, total:1700,
+    ing:[["밥","1공기",300],["계란","2개",800],["대파","약간",200],["당근","약간",200],["간장","1작은술",100],["식용유","1큰술",100]],
+    steps:["팬에 기름을 두르고 계란을 스크램블한다.","대파·당근을 넣고 볶는다.","밥을 넣고 간장으로 간하며 볶는다.","고슬하게 볶아 완성한다."] },
+  { id:15, name:"소고기미역국", emoji:"🍲", time:30, level:"보통", servings:2, total:4500,
+    ing:[["미역","한 줌",500],["소고기","100g",3000],["다진마늘","1작은술",100],["간장","1큰술",100],["참기름","1큰술",150]],
+    steps:["미역을 물에 불려 적당히 썬다.","냄비에 참기름을 두르고 소고기를 볶는다.","미역을 넣고 함께 볶다가 물을 붓는다.","간장·다진마늘로 간하고 20분 끓인다."] },
+  { id:16, name:"감자조림", emoji:"🥘", time:20, level:"쉬움", servings:2, total:1600,
+    ing:[["감자","2개",800],["당근","약간",200],["간장","2큰술",150],["설탕","1큰술",50],["식용유","1큰술",100]],
+    steps:["감자·당근을 깍둑 썬다.","팬에 기름을 두르고 감자를 볶는다.","물과 간장·설탕을 넣고 졸인다.","국물이 자작해질 때까지 조린다."] },
+  { id:17, name:"부대찌개", emoji:"🍲", time:30, level:"보통", servings:3, total:7000,
+    ing:[["햄","1캔",2500],["소시지","4개",1500],["김치","2컵",800],["두부","1/2모",700],["라면사리","1개",700],["대파","약간",200],["고춧가루","1큰술",200],["고추장","1큰술",150]],
+    steps:["햄·소시지·김치·두부를 냄비에 보기 좋게 담는다.","고춧가루·고추장으로 양념을 올리고 물을 붓는다.","끓으면 중불에서 푹 끓인다.","라면사리와 대파를 넣고 마저 끓인다."] },
+  { id:18, name:"시금치무침", emoji:"🥗", time:10, level:"쉬움", servings:2, total:1200,
+    ing:[["시금치","1단",800],["다진마늘","1작은술",100],["간장","1작은술",100],["참기름","1큰술",150],["소금","약간",30]],
+    steps:["시금치를 끓는 물에 30초 데친다.","찬물에 헹궈 물기를 꼭 짠다.","간장·다진마늘·참기름·소금으로 무친다."] },
+  { id:19, name:"닭볶음탕", emoji:"🍗", time:40, level:"어려움", servings:3, total:7500,
+    ing:[["닭고기","600g",5000],["감자","2개",800],["당근","1/2개",300],["양파","1개",400],["고추장","2큰술",300],["고춧가루","2큰술",300],["간장","2큰술",150],["다진마늘","1큰술",100]],
+    steps:["닭을 끓는 물에 데쳐 기름기를 뺀다.","고추장·고춧가루·간장·다진마늘로 양념장을 만든다.","냄비에 닭과 양념, 물을 넣고 끓인다.","감자·당근·양파를 넣고 푹 졸인다."] },
+  { id:20, name:"참치마요덮밥", emoji:"🍚", time:10, level:"쉬움", servings:1, total:2300,
+    ing:[["밥","1공기",300],["참치캔","1캔",1500],["마요네즈","2큰술",200],["계란","1개",400],["대파","약간",200],["간장","1작은술",100]],
+    steps:["참치캔의 기름을 빼고 마요네즈와 섞는다.","계란프라이를 부친다.","그릇에 밥을 담고 참치마요를 올린다.","계란과 대파를 올리고 간장을 살짝 뿌린다."] },
+
+  /* ===== 1인분 간단 요리 ===== */
+  { id:21, name:"간장계란밥", emoji:"🍚", time:5, level:"쉬움", servings:1, total:1050,
+    ing:[["밥","1공기",300],["계란","1개",400],["간장","1작은술",100],["참기름","약간",150],["식용유","1작은술",100]],
+    steps:["계란을 반숙 프라이로 부친다.","뜨거운 밥에 계란을 올린다.","간장·참기름을 두르고 비벼 먹는다."] },
+  { id:22, name:"버터간장계란밥", emoji:"🧈", time:7, level:"쉬움", servings:1, total:1100,
+    ing:[["밥","1공기",300],["계란","1개",400],["버터","1조각",300],["간장","1작은술",100]],
+    steps:["팬에 버터를 녹여 계란을 반숙으로 부친다.","뜨거운 밥에 계란과 남은 버터를 올린다.","간장을 두르고 비빈다."] },
+  { id:23, name:"참치김치덮밥", emoji:"🍚", time:10, level:"쉬움", servings:1, total:2550,
+    ing:[["밥","1공기",300],["참치캔","1캔",1500],["김치","1컵",500],["간장","1작은술",100],["참기름","약간",150]],
+    steps:["참치 기름을 빼고 송송 썬 김치와 함께 볶는다.","간장으로 간한다.","밥에 올리고 참기름을 두른다."] },
+  { id:24, name:"스팸김치볶음밥", emoji:"🍳", time:12, level:"쉬움", servings:1, total:2900,
+    ing:[["밥","1공기",300],["스팸","1/2캔",1800],["김치","1컵",500],["대파","약간",200],["식용유","1큰술",100]],
+    steps:["스팸을 깍둑 썰어 볶는다.","김치와 대파를 넣고 볶는다.","밥을 넣고 고슬하게 볶는다."] },
+  { id:25, name:"어묵볶음밥", emoji:"🍳", time:12, level:"쉬움", servings:1, total:1900,
+    ing:[["밥","1공기",300],["어묵","1장",1000],["당근","약간",200],["대파","약간",200],["간장","1작은술",100],["식용유","1큰술",100]],
+    steps:["어묵과 당근을 잘게 썬다.","팬에 볶다가 밥을 넣는다.","간장으로 간하며 볶는다."] },
+  { id:26, name:"새우볶음밥", emoji:"🍤", time:15, level:"보통", servings:1, total:2700,
+    ing:[["밥","1공기",300],["새우","6마리",1500],["계란","1개",400],["대파","약간",200],["굴소스","1큰술",300],["식용유","1큰술",100]],
+    steps:["새우를 볶다가 계란을 넣어 스크램블한다.","대파와 밥을 넣고 볶는다.","굴소스로 간한다."] },
+  { id:27, name:"멸치주먹밥", emoji:"🍙", time:10, level:"쉬움", servings:1, total:1150,
+    ing:[["밥","1공기",300],["멸치","한 줌",400],["김가루","약간",200],["참기름","약간",150],["깨","약간",100]],
+    steps:["멸치를 잘게 다져 마른 팬에 볶는다.","밥에 멸치·김가루·참기름·깨를 넣어 섞는다.","한입 크기로 뭉친다."] },
+  { id:28, name:"참치마요주먹밥", emoji:"🍙", time:10, level:"쉬움", servings:1, total:2200,
+    ing:[["밥","1공기",300],["참치캔","1캔",1500],["마요네즈","1큰술",200],["김가루","약간",200]],
+    steps:["참치 기름을 빼고 마요네즈와 섞는다.","밥에 김가루를 넣어 섞는다.","참치마요를 속에 넣고 동그랗게 뭉친다."] },
+  { id:29, name:"콩나물밥", emoji:"🍚", time:30, level:"보통", servings:1, total:1550,
+    ing:[["쌀","1컵",300],["콩나물","1줌",800],["간장","1큰술",100],["대파","약간",200],["참기름","약간",150]],
+    steps:["쌀 위에 콩나물을 얹어 밥을 짓는다.","간장·대파·참기름으로 양념장을 만든다.","밥을 양념장에 비벼 먹는다."] },
+  { id:30, name:"김치비빔국수", emoji:"🍜", time:15, level:"쉬움", servings:1, total:1900,
+    ing:[["소면","1인분",800],["김치","1컵",500],["고추장","1큰술",300],["설탕","1작은술",50],["참기름","약간",150],["깨","약간",100]],
+    steps:["소면을 삶아 찬물에 헹군다.","고추장·설탕·참기름으로 양념을 만든다.","김치와 면을 양념에 비비고 깨를 뿌린다."] },
+  { id:31, name:"간장비빔국수", emoji:"🍜", time:12, level:"쉬움", servings:1, total:1400,
+    ing:[["소면","1인분",800],["간장","1큰술",100],["참기름","1큰술",150],["설탕","1작은술",50],["깨","약간",100],["김가루","약간",200]],
+    steps:["소면을 삶아 헹군다.","간장·참기름·설탕을 섞는다.","면을 비비고 김가루·깨를 올린다."] },
+  { id:32, name:"계란라면", emoji:"🍜", time:7, level:"쉬움", servings:1, total:1400,
+    ing:[["라면","1개",800],["계란","1개",400],["대파","약간",200]],
+    steps:["물을 끓여 면과 스프를 넣는다.","계란을 풀어 넣는다.","대파를 올린다."] },
+  { id:33, name:"떡라면", emoji:"🍜", time:10, level:"쉬움", servings:1, total:1900,
+    ing:[["라면","1개",800],["떡","한 줌",500],["계란","1개",400],["대파","약간",200]],
+    steps:["떡을 물에 불린다.","면 끓일 때 떡을 함께 넣는다.","계란과 대파를 넣어 마무리한다."] },
+  { id:34, name:"김치라면", emoji:"🍜", time:8, level:"쉬움", servings:1, total:1900,
+    ing:[["라면","1개",800],["김치","1컵",500],["대파","약간",200],["계란","1개",400]],
+    steps:["김치를 넣고 물을 끓인다.","면과 스프를 넣는다.","계란과 대파를 넣는다."] },
+  { id:35, name:"카레라이스", emoji:"🍛", time:25, level:"보통", servings:1, total:2000,
+    ing:[["밥","1공기",300],["카레가루","2큰술",700],["감자","1개",400],["당근","1/2개",300],["양파","1/2개",300]],
+    steps:["감자·당근·양파를 썰어 볶는다.","물을 붓고 익힌다.","카레가루를 풀어 걸쭉하게 끓인다.","밥에 끼얹는다."] },
+  { id:36, name:"오므라이스", emoji:"🍳", time:20, level:"보통", servings:1, total:2700,
+    ing:[["밥","1공기",300],["계란","2개",800],["양파","1/2개",300],["케첩","2큰술",200],["햄","약간",1000],["식용유","1큰술",100]],
+    steps:["양파·햄을 볶다가 밥과 케첩을 넣어 볶는다.","계란을 얇게 부친다.","볶음밥을 계란으로 감싼다.","케첩을 뿌린다."] },
+  { id:37, name:"김치볶음우동", emoji:"🍜", time:12, level:"쉬움", servings:1, total:1800,
+    ing:[["우동","1인분",900],["김치","1컵",500],["대파","약간",200],["간장","1작은술",100],["식용유","1큰술",100]],
+    steps:["우동면을 데친다.","김치를 볶다가 면을 넣는다.","간장으로 간하고 대파를 올린다."] },
+  { id:38, name:"계란죽", emoji:"🥣", time:20, level:"쉬움", servings:1, total:1080,
+    ing:[["밥","1공기",300],["계란","1개",400],["참기름","약간",150],["소금","약간",30],["대파","약간",200]],
+    steps:["밥에 물을 넉넉히 넣고 푹 끓인다.","계란을 풀어 넣는다.","참기름·소금으로 간하고 대파를 올린다."] },
+  { id:39, name:"참치죽", emoji:"🥣", time:20, level:"쉬움", servings:1, total:2180,
+    ing:[["밥","1공기",300],["참치캔","1캔",1500],["당근","약간",200],["참기름","약간",150],["소금","약간",30]],
+    steps:["밥에 물을 넣고 끓인다.","참치와 당근을 넣는다.","소금으로 간하고 참기름을 두른다."] },
+  { id:40, name:"두부덮밥", emoji:"🍚", time:15, level:"쉬움", servings:1, total:2300,
+    ing:[["밥","1공기",300],["두부","1/2모",700],["간장","1큰술",100],["굴소스","1작은술",300],["대파","약간",200],["식용유","1큰술",100]],
+    steps:["두부를 깍둑 썰어 노릇하게 굽는다.","간장·굴소스로 간한다.","밥에 올리고 대파를 뿌린다."] },
+  { id:41, name:"가지덮밥", emoji:"🍆", time:15, level:"쉬움", servings:1, total:1400,
+    ing:[["밥","1공기",300],["가지","1개",500],["간장","1큰술",100],["굴소스","1작은술",300],["다진마늘","1작은술",100],["식용유","1큰술",100]],
+    steps:["가지를 썰어 기름에 푹 볶는다.","간장·굴소스·마늘로 간한다.","밥에 올린다."] },
+  { id:42, name:"마파두부덮밥", emoji:"🍚", time:20, level:"보통", servings:1, total:3900,
+    ing:[["밥","1공기",300],["두부","1/2모",700],["돼지고기","100g",2000],["고추장","1큰술",300],["대파","약간",200],["다진마늘","1작은술",100],["식용유","1큰술",100],["간장","1작은술",100]],
+    steps:["돼지고기를 볶는다.","고추장·간장·물을 넣고 끓인다.","두부를 넣고 졸인다.","밥에 올리고 대파를 뿌린다."] },
+
+  /* ===== 밑반찬 ===== */
+  { id:43, name:"멸치볶음", emoji:"🥢", time:15, level:"쉬움", servings:4, total:1550,
+    ing:[["멸치","2컵",1200],["간장","1큰술",100],["설탕","1큰술",50],["식용유","1큰술",100],["깨","약간",100]],
+    steps:["마른 팬에 멸치를 볶아 비린내를 날린다.","기름을 두르고 간장·설탕을 넣는다.","약불에 윤기나게 볶고 깨를 뿌린다."] },
+  { id:44, name:"감자채볶음", emoji:"🥢", time:15, level:"쉬움", servings:3, total:1230,
+    ing:[["감자","2개",800],["양파","1/2개",300],["소금","약간",30],["식용유","1큰술",100]],
+    steps:["감자를 채 썰어 물에 헹군다.","팬에 양파와 함께 볶는다.","소금으로 간한다."] },
+  { id:45, name:"애호박볶음", emoji:"🥢", time:12, level:"쉬움", servings:2, total:700,
+    ing:[["애호박","1개",400],["새우젓","1작은술",100],["다진마늘","1작은술",100],["식용유","1큰술",100]],
+    steps:["애호박을 반달로 썬다.","기름에 볶다가 새우젓·마늘로 간한다.","살짝 볶아낸다."] },
+  { id:46, name:"가지볶음", emoji:"🍆", time:12, level:"쉬움", servings:2, total:950,
+    ing:[["가지","1개",500],["간장","1큰술",100],["다진마늘","1작은술",100],["참기름","약간",150],["식용유","1큰술",100]],
+    steps:["가지를 썰어 기름에 볶는다.","간장·마늘로 간한다.","참기름을 두른다."] },
+  { id:47, name:"콩나물무침", emoji:"🥗", time:12, level:"쉬움", servings:3, total:1380,
+    ing:[["콩나물","1봉",800],["소금","약간",30],["다진마늘","1작은술",100],["참기름","약간",150],["깨","약간",100],["쪽파","약간",200]],
+    steps:["콩나물을 데쳐 찬물에 헹군다.","물기를 짠다.","소금·마늘·참기름·깨로 무친다."] },
+  { id:48, name:"무생채", emoji:"🥗", time:15, level:"쉬움", servings:3, total:980,
+    ing:[["무","1/4개",500],["고춧가루","1큰술",200],["식초","1큰술",100],["설탕","1작은술",50],["소금","약간",30],["다진마늘","1작은술",100]],
+    steps:["무를 채 썬다.","고춧가루로 색을 낸다.","식초·설탕·소금·마늘로 새콤하게 무친다."] },
+  { id:49, name:"오이무침", emoji:"🥒", time:10, level:"쉬움", servings:2, total:950,
+    ing:[["오이","1개",400],["고춧가루","1큰술",200],["식초","1큰술",100],["설탕","1작은술",50],["다진마늘","1작은술",100],["깨","약간",100]],
+    steps:["오이를 어슷 썬다.","고춧가루·식초·설탕·마늘로 무친다.","깨를 뿌린다."] },
+  { id:50, name:"부추무침", emoji:"🥗", time:10, level:"쉬움", servings:2, total:1000,
+    ing:[["부추","1줌",500],["고춧가루","1큰술",200],["간장","1큰술",100],["식초","1작은술",100],["깨","약간",100]],
+    steps:["부추를 4cm로 썬다.","고춧가루·간장·식초로 살살 무친다.","깨를 뿌린다."] },
+  { id:51, name:"진미채무침", emoji:"🥢", time:15, level:"쉬움", servings:4, total:2700,
+    ing:[["진미채","2컵",2000],["고추장","1큰술",300],["마요네즈","1큰술",200],["물엿","1큰술",100],["깨","약간",100]],
+    steps:["진미채를 잘게 찢는다.","고추장·물엿·마요네즈로 양념을 만든다.","진미채를 무치고 깨를 뿌린다."] },
+  { id:52, name:"메추리알장조림", emoji:"🥚", time:25, level:"쉬움", servings:4, total:1800,
+    ing:[["메추리알","20개",1500],["간장","2큰술",150],["설탕","1큰술",50],["다진마늘","1작은술",100]],
+    steps:["메추리알을 삶아 껍질을 깐다.","간장·설탕·물을 끓인다.","메추리알을 넣고 졸인다."] },
+  { id:53, name:"계란장조림", emoji:"🥚", time:25, level:"쉬움", servings:4, total:1700,
+    ing:[["계란","4개",1200],["간장","2큰술",150],["설탕","1큰술",50],["청양고추","1개",200],["다진마늘","1작은술",100]],
+    steps:["계란을 삶아 껍질을 깐다.","간장·설탕·물·청양고추를 끓인다.","계란을 넣고 졸인다."] },
+  { id:54, name:"김무침", emoji:"🥢", time:8, level:"쉬움", servings:3, total:800,
+    ing:[["김","5장",400],["간장","1큰술",100],["참기름","1큰술",150],["깨","약간",100],["설탕","1작은술",50]],
+    steps:["김을 살짝 구워 부순다.","간장·참기름·설탕을 섞는다.","김을 무치고 깨를 뿌린다."] },
+  { id:55, name:"깻잎무침", emoji:"🌿", time:15, level:"쉬움", servings:3, total:1100,
+    ing:[["깻잎","20장",500],["간장","2큰술",100],["고춧가루","1큰술",200],["다진마늘","1작은술",100],["쪽파","약간",200]],
+    steps:["깻잎을 씻어 펼친다.","간장·고춧가루·마늘·쪽파로 양념을 만든다.","켜켜이 양념을 발라 재운다."] },
+  { id:56, name:"양배추무침", emoji:"🥗", time:10, level:"쉬움", servings:3, total:800,
+    ing:[["양배추","1/4통",400],["고추장","1큰술",150],["식초","1큰술",100],["설탕","1작은술",50],["깨","약간",100]],
+    steps:["양배추를 한입 크기로 썬다.","고추장·식초·설탕으로 초고추장을 만든다.","양배추를 무친다."] },
+  { id:57, name:"숙주나물", emoji:"🥗", time:10, level:"쉬움", servings:3, total:880,
+    ing:[["숙주","1봉",500],["소금","약간",30],["다진마늘","1작은술",100],["참기름","약간",150],["깨","약간",100]],
+    steps:["숙주를 살짝 데친다.","찬물에 헹군다.","소금·마늘·참기름·깨로 무친다."] },
+  { id:58, name:"가지나물", emoji:"🍆", time:15, level:"쉬움", servings:2, total:950,
+    ing:[["가지","1개",500],["간장","1큰술",100],["다진마늘","1작은술",100],["참기름","약간",150],["깨","약간",100]],
+    steps:["가지를 쪄서 결대로 찢는다.","간장·마늘·참기름으로 무친다.","깨를 뿌린다."] },
+  { id:59, name:"무나물", emoji:"🥢", time:15, level:"쉬움", servings:3, total:980,
+    ing:[["무","1/4개",500],["소금","약간",30],["다진마늘","1작은술",100],["참기름","약간",150],["깨","약간",100],["식용유","1큰술",100]],
+    steps:["무를 채 썬다.","기름에 볶다가 물을 조금 넣어 익힌다.","소금·마늘·참기름으로 무친다."] },
+  { id:60, name:"미역줄기볶음", emoji:"🥢", time:15, level:"쉬움", servings:3, total:800,
+    ing:[["미역","1줌",500],["다진마늘","1작은술",100],["식용유","1큰술",100],["깨","약간",100]],
+    steps:["미역줄기를 물에 담가 짠기를 뺀다.","기름에 마늘과 함께 볶는다.","깨를 뿌린다."] },
+  { id:61, name:"어묵조림", emoji:"🥢", time:15, level:"쉬움", servings:3, total:1500,
+    ing:[["어묵","2장",1000],["간장","2큰술",150],["설탕","1큰술",50],["물엿","1큰술",100],["청양고추","1개",200]],
+    steps:["어묵을 먹기 좋게 썬다.","간장·설탕·물엿·물을 끓인다.","어묵을 넣고 졸인다."] },
+  { id:62, name:"알감자조림", emoji:"🥔", time:25, level:"쉬움", servings:3, total:1300,
+    ing:[["감자","2개",800],["간장","2큰술",150],["설탕","1작은술",50],["물엿","1큰술",100],["식용유","1큰술",100],["깨","약간",100]],
+    steps:["작은 감자를 삶는다.","간장·설탕·물엿으로 조린다.","윤기나게 졸이고 깨를 뿌린다."] },
+  { id:63, name:"두부부침", emoji:"🥢", time:12, level:"쉬움", servings:2, total:1530,
+    ing:[["두부","1모",1300],["소금","약간",30],["식용유","1큰술",100],["간장","1큰술",100]],
+    steps:["두부를 도톰하게 썰어 소금을 뿌린다.","물기를 닦고 기름에 노릇하게 부친다.","양념간장을 곁들인다."] },
+  { id:64, name:"김치볶음", emoji:"🥢", time:12, level:"쉬움", servings:3, total:900,
+    ing:[["김치","2컵",500],["설탕","1작은술",50],["참기름","약간",150],["깨","약간",100],["식용유","1큰술",100]],
+    steps:["김치를 송송 썬다.","기름에 설탕과 함께 볶는다.","참기름·깨로 마무리한다."] },
+  { id:65, name:"콩자반", emoji:"🫘", time:30, level:"보통", servings:4, total:1400,
+    ing:[["검은콩","1컵",1000],["간장","2큰술",150],["설탕","1큰술",50],["물엿","1큰술",100],["깨","약간",100]],
+    steps:["검은콩을 물에 불린다.","간장·설탕·물엿·물을 넣고 끓인다.","약불에 윤기나게 졸인다."] },
+  { id:66, name:"우엉조림", emoji:"🥢", time:25, level:"보통", servings:4, total:1200,
+    ing:[["우엉","1대",800],["간장","2큰술",150],["설탕","1큰술",50],["물엿","1큰술",100],["깨","약간",100]],
+    steps:["우엉을 채 썰어 식초물에 담근다.","간장·설탕·물엿으로 조린다.","깨를 뿌린다."] },
+
+  /* ===== 국·찌개 ===== */
+  { id:67, name:"계란국", emoji:"🍲", time:12, level:"쉬움", servings:2, total:830,
+    ing:[["계란","2개",400],["대파","약간",200],["다진마늘","1작은술",100],["간장","1작은술",100],["소금","약간",30]],
+    steps:["물을 끓여 간장·소금으로 간한다.","계란을 풀어 줄알을 친다.","대파·마늘을 넣는다."] },
+  { id:68, name:"북어국", emoji:"🍲", time:25, level:"보통", servings:3, total:3050,
+    ing:[["북어","1줌",1500],["계란","1개",400],["두부","1/2모",700],["대파","약간",200],["다진마늘","1작은술",100],["참기름","약간",150]],
+    steps:["북어를 참기름에 볶는다.","물을 붓고 끓인다.","두부와 계란을 넣는다.","대파·마늘로 마무리한다."] },
+  { id:69, name:"소고기무국", emoji:"🍲", time:30, level:"보통", servings:3, total:4050,
+    ing:[["소고기","150g",3000],["무","1/4개",500],["대파","약간",200],["다진마늘","1작은술",100],["간장","1큰술",100],["참기름","약간",150]],
+    steps:["소고기를 참기름에 볶는다.","무를 넣고 볶다가 물을 붓는다.","간장·마늘로 간한다.","대파를 넣는다."] },
+  { id:70, name:"순두부찌개", emoji:"🍲", time:20, level:"보통", servings:2, total:2400,
+    ing:[["순두부","1봉",1000],["계란","1개",400],["김치","1컵",500],["대파","약간",200],["고춧가루","1큰술",200],["다진마늘","1작은술",100]],
+    steps:["김치와 고춧가루를 볶는다.","물을 붓고 끓인다.","순두부를 넣고 끓인다.","계란을 깨 넣고 대파를 올린다."] },
+  { id:71, name:"떡국", emoji:"🍲", time:25, level:"보통", servings:2, total:2400,
+    ing:[["떡국떡","2인분",1500],["계란","1개",400],["김가루","약간",200],["대파","약간",200],["간장","1큰술",100]],
+    steps:["멸치 육수를 낸다.","떡을 넣고 끓인다.","간장으로 간한다.","계란지단·김가루를 올린다."] },
+  { id:72, name:"만둣국", emoji:"🥟", time:20, level:"쉬움", servings:2, total:2900,
+    ing:[["만두","8개",2000],["계란","1개",400],["대파","약간",200],["김가루","약간",200],["간장","1큰술",100]],
+    steps:["육수를 끓인다.","만두를 넣고 끓인다.","계란을 풀어 넣는다.","김가루·대파를 올린다."] },
+  { id:73, name:"어묵탕", emoji:"🍢", time:20, level:"쉬움", servings:3, total:1900,
+    ing:[["어묵","2장",1000],["무","1/4개",500],["대파","약간",200],["간장","1큰술",100],["다진마늘","1작은술",100]],
+    steps:["무로 국물을 낸다.","어묵을 꼬치에 끼워 넣는다.","간장으로 간하고 대파를 넣는다."] },
+  { id:74, name:"콩나물해장국", emoji:"🍲", time:20, level:"쉬움", servings:2, total:1700,
+    ing:[["콩나물","1봉",800],["계란","1개",400],["대파","약간",200],["고춧가루","1작은술",200],["새우젓","1작은술",100]],
+    steps:["콩나물을 넣고 끓인다.","새우젓으로 간한다.","계란을 깨 넣고 고춧가루·대파를 올린다."] },
+  { id:75, name:"김치콩나물국", emoji:"🍲", time:20, level:"쉬움", servings:2, total:1800,
+    ing:[["김치","1컵",500],["콩나물","1봉",800],["대파","약간",200],["다진마늘","1작은술",100],["고춧가루","1작은술",200]],
+    steps:["김치를 볶는다.","물과 콩나물을 넣고 끓인다.","고춧가루·마늘로 간하고 대파를 넣는다."] },
+  { id:76, name:"청국장", emoji:"🍲", time:25, level:"보통", servings:2, total:3000,
+    ing:[["청국장","1팩",1200],["두부","1/2모",700],["김치","1컵",500],["애호박","1/4개",400],["대파","약간",200]],
+    steps:["김치와 애호박을 넣고 끓인다.","청국장을 푼다.","두부를 넣고 한소끔 끓인다.","대파를 올린다."] },
+
+  /* ===== 메인·볶음·조림 ===== */
+  { id:77, name:"오징어볶음", emoji:"🦑", time:25, level:"보통", servings:2, total:4300,
+    ing:[["오징어","1마리",3000],["양파","1/2개",300],["당근","약간",300],["고추장","2큰술",300],["고춧가루","1큰술",200],["대파","약간",200]],
+    steps:["오징어를 손질해 썬다.","채소와 함께 센 불에 볶는다.","고추장·고춧가루 양념을 넣어 볶는다.","대파를 넣는다."] },
+  { id:78, name:"닭갈비", emoji:"🍗", time:35, level:"보통", servings:3, total:7500,
+    ing:[["닭고기","500g",5000],["고구마","1개",800],["양배추","2장",400],["떡","한 줌",500],["고추장","2큰술",300],["고춧가루","1큰술",200],["양파","1/2개",300]],
+    steps:["닭을 고추장·고춧가루 양념에 재운다.","팬에 닭과 채소·떡을 볶는다.","뚜껑을 덮고 익힌다.","센 불에 볶아 마무리한다."] },
+  { id:79, name:"간장찜닭", emoji:"🍗", time:40, level:"어려움", servings:3, total:7500,
+    ing:[["닭고기","500g",5000],["감자","1개",800],["당근","1/2개",300],["양파","1/2개",300],["간장","3큰술",200],["설탕","1큰술",100],["당면","1줌",800]],
+    steps:["닭을 끓는 물에 데친다.","간장·설탕·물로 조린다.","감자·당근·양파를 넣는다.","당면을 넣고 졸인다."] },
+  { id:80, name:"돼지고기김치찜", emoji:"🥘", time:40, level:"보통", servings:3, total:4900,
+    ing:[["돼지고기","300g",3000],["김치","3컵",800],["두부","1/2모",700],["대파","약간",200],["고춧가루","1큰술",200]],
+    steps:["김치와 돼지고기를 냄비에 안친다.","물을 붓고 푹 끓인다.","두부를 올린다.","대파를 넣는다."] },
+  { id:81, name:"고등어조림", emoji:"🐟", time:30, level:"보통", servings:2, total:4150,
+    ing:[["고등어","1마리",3000],["무","1/4개",500],["대파","약간",200],["고춧가루","1큰술",200],["간장","2큰술",150],["다진마늘","1작은술",100]],
+    steps:["무를 깔고 고등어를 올린다.","간장·고춧가루 양념장을 끼얹는다.","자작하게 졸인다.","대파를 올린다."] },
+  { id:82, name:"햄감자볶음", emoji:"🥢", time:15, level:"쉬움", servings:2, total:2400,
+    ing:[["햄","약간",1000],["감자","2개",800],["양파","1/2개",300],["케첩","1큰술",200],["식용유","1큰술",100]],
+    steps:["감자를 채 썰어 볶는다.","햄·양파를 넣고 볶는다.","케첩으로 간한다."] },
+  { id:83, name:"소시지야채볶음", emoji:"🌭", time:15, level:"쉬움", servings:2, total:2400,
+    ing:[["소시지","4개",1500],["양파","1/2개",300],["피망","1개",300],["케첩","1큰술",200],["식용유","1큰술",100]],
+    steps:["소시지에 칼집을 낸다.","채소와 함께 볶는다.","케첩으로 간한다."] },
+  { id:84, name:"잡채", emoji:"🍜", time:35, level:"어려움", servings:3, total:2900,
+    ing:[["당면","2줌",1000],["시금치","1줌",500],["당근","1/2개",300],["양파","1/2개",300],["버섯","약간",500],["간장","2큰술",150],["참기름","1큰술",150]],
+    steps:["당면을 삶는다.","채소를 각각 볶는다.","간장·참기름으로 당면을 무친다.","채소와 함께 버무린다."] },
+  { id:85, name:"두부김치", emoji:"🥘", time:20, level:"쉬움", servings:2, total:4350,
+    ing:[["두부","1모",1300],["김치","2컵",500],["돼지고기","100g",2000],["대파","약간",200],["고춧가루","1작은술",200],["참기름","약간",150]],
+    steps:["돼지고기와 김치를 볶는다.","두부를 데쳐 썬다.","볶은 김치를 두부와 곁들인다."] },
+  { id:86, name:"제육덮밥", emoji:"🍚", time:20, level:"보통", servings:1, total:3700,
+    ing:[["밥","1공기",300],["돼지고기","150g",2500],["고추장","1큰술",300],["양파","1/2개",300],["대파","약간",200],["간장","1작은술",100]],
+    steps:["돼지고기를 고추장 양념에 볶는다.","양파를 넣는다.","밥에 올리고 대파를 뿌린다."] },
+  { id:87, name:"불고기", emoji:"🥩", time:25, level:"보통", servings:3, total:5250,
+    ing:[["소고기","300g",4000],["양파","1/2개",300],["당근","약간",300],["대파","약간",200],["간장","3큰술",200],["설탕","1큰술",100],["참기름","약간",150]],
+    steps:["소고기를 간장·설탕 양념에 재운다.","채소와 함께 볶는다.","대파를 넣고 마무리한다."] },
+  { id:88, name:"동그랑땡", emoji:"🥢", time:30, level:"보통", servings:3, total:4200,
+    ing:[["돼지고기","150g",2000],["두부","1/2모",700],["당근","약간",300],["양파","1/2개",300],["계란","1개",400],["밀가루","1컵",500]],
+    steps:["다진 고기·으깬 두부·채소를 섞는다.","동그랗게 빚는다.","밀가루·계란물을 입힌다.","기름에 부친다."] },
+  { id:89, name:"오징어덮밥", emoji:"🦑", time:20, level:"보통", servings:1, total:4100,
+    ing:[["밥","1공기",300],["오징어","1마리",3000],["양파","1/2개",300],["고추장","1큰술",300],["대파","약간",200]],
+    steps:["오징어와 양파를 고추장 양념에 볶는다.","밥에 올린다.","대파를 뿌린다."] },
+  { id:90, name:"카레우동", emoji:"🍜", time:20, level:"쉬움", servings:1, total:2300,
+    ing:[["우동","1인분",900],["카레가루","2큰술",700],["양파","1/2개",300],["당근","약간",300],["식용유","1큰술",100]],
+    steps:["채소를 볶는다.","물과 카레가루를 넣어 끓인다.","우동면을 넣고 끓인다."] },
+  { id:91, name:"김치우동", emoji:"🍜", time:15, level:"쉬움", servings:1, total:2100,
+    ing:[["우동","1인분",900],["김치","1컵",500],["계란","1개",400],["대파","약간",200],["간장","1작은술",100]],
+    steps:["김치를 볶는다.","물을 붓고 끓인다.","우동면과 계란을 넣는다."] },
+  { id:92, name:"라볶이", emoji:"🍢", time:20, level:"쉬움", servings:2, total:2850,
+    ing:[["떡","한 줌",500],["라면","1개",800],["어묵","2장",1000],["고추장","2큰술",300],["설탕","1작은술",50],["대파","약간",200]],
+    steps:["물에 고추장·설탕을 푼다.","떡·어묵을 넣고 끓인다.","라면을 넣어 익힌다.","대파를 올린다."] },
+  { id:93, name:"비빔당면", emoji:"🍜", time:15, level:"쉬움", servings:2, total:2050,
+    ing:[["당면","2줌",1000],["당근","약간",300],["양파","1/2개",300],["간장","1큰술",150],["설탕","1작은술",50],["참기름","1큰술",150],["깨","약간",100]],
+    steps:["당면을 삶는다.","채소를 볶는다.","간장·설탕·참기름으로 비빈다."] },
+  { id:94, name:"김치말이국수", emoji:"🍜", time:12, level:"쉬움", servings:1, total:1550,
+    ing:[["소면","1인분",800],["김치","1컵",500],["설탕","1작은술",50],["식초","1큰술",100],["깨","약간",100]],
+    steps:["소면을 삶아 헹군다.","김치국물에 식초·설탕을 섞어 육수를 만든다.","면을 말고 김치를 올린다."] },
+  { id:95, name:"나물비빔밥", emoji:"🍚", time:25, level:"보통", servings:1, total:2200,
+    ing:[["밥","1공기",300],["콩나물","한 줌",400],["시금치","한 줌",500],["당근","약간",300],["고추장","1큰술",150],["참기름","약간",150],["계란","1개",400]],
+    steps:["나물을 각각 데쳐 무친다.","밥에 나물을 색색이 올린다.","계란프라이를 얹는다.","고추장·참기름으로 비빈다."] },
+  { id:96, name:"감자국", emoji:"🍲", time:20, level:"쉬움", servings:2, total:1100,
+    ing:[["감자","1개",400],["양파","1/2개",300],["대파","약간",200],["간장","1큰술",100],["다진마늘","1작은술",100]],
+    steps:["감자·양파를 썬다.","물을 붓고 끓인다.","간장·마늘로 간하고 대파를 넣는다."] },
+  { id:97, name:"스팸구이", emoji:"🥢", time:8, level:"쉬움", servings:2, total:1900,
+    ing:[["스팸","1/2캔",1800],["식용유","약간",100]],
+    steps:["스팸을 도톰하게 썬다.","팬에 기름 없이 또는 살짝 두르고 굽는다.","앞뒤로 노릇하게 굽는다."] },
+  { id:98, name:"계란찜", emoji:"🥚", time:15, level:"쉬움", servings:2, total:980,
+    ing:[["계란","3개",1200],["대파","약간",200],["소금","약간",30],["새우젓","1작은술",100]],
+    steps:["계란을 풀고 물을 섞는다.","새우젓·소금으로 간한다.","뚝배기에 부어 약불에 익힌다.","대파를 올린다."] },
+  { id:99, name:"감자전", emoji:"🥞", time:20, level:"보통", servings:2, total:1100,
+    ing:[["감자","2개",800],["소금","약간",30],["식용유","넉넉히",150],["대파","약간",200]],
+    steps:["감자를 갈아 물기를 살짝 뺀다.","소금·대파를 섞는다.","팬에 기름을 두르고 부친다.","앞뒤로 노릇하게 부친다."] },
+  { id:100, name:"부추전", emoji:"🥞", time:15, level:"쉬움", servings:2, total:1450,
+    ing:[["부추","1줌",500],["밀가루","1컵",500],["계란","1개",400],["식용유","넉넉히",150],["소금","약간",30]],
+    steps:["부추를 4cm로 썬다.","밀가루·계란·물·소금으로 반죽한다.","부추를 섞는다.","팬에 펴 부친다."] },
+];
+
+/* ============================================================
+   localStorage helpers
+============================================================ */
+const load = (k, def)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } };
+const save = (k, v)=> localStorage.setItem(k, JSON.stringify(v));
+
+const won = (n)=> n.toLocaleString("ko-KR")+"원";
+const todayStr = ()=> new Date().toISOString().slice(0,10);
+const daysLeft = (dateStr)=>{
+  if(!dateStr) return null;
+  const d = new Date(dateStr+"T00:00:00");
+  const t = new Date(todayStr()+"T00:00:00");
+  return Math.round((d - t)/86400000);
+};
+
+/* ============================================================
+   목록에 없는 재료 → 레시피 자동 생성
+   기본 레시피가 쓰지 않는 '새 재료'를 냉장고에 담으면,
+   그 재료를 주재료로 하는 조리법(볶음·무침·된장국·전)을 만들어 준다.
+============================================================ */
+const RECIPE_ING_SET = new Set(RECIPES.flatMap(r=>r.ing.map(i=>norm(i[0]))));
+
+function generateForNovel(fridge){
+  const seen = new Set();
+  const novel = [];
+  fridge.forEach(f=>{
+    const key = norm(f.name);
+    if(key && !RECIPE_ING_SET.has(key) && !seen.has(key)){ seen.add(key); novel.push(f.name); }
+  });
+  let id = 1001;
+  const out = [];
+  novel.forEach(X=>{
+    out.push(
+      { id:id++, gen:true, name:`${X}볶음`, emoji:"🥘", time:15, level:"쉬움", servings:2, total:1650,
+        ing:[[X,"적당량",1000],["다진마늘","1작은술",100],["간장","1큰술",100],["식용유","1큰술",100],["대파","약간",200],["참기름","약간",150]],
+        steps:[`${X}을(를) 먹기 좋게 썬다.`,"팬에 기름을 두르고 마늘을 볶아 향을 낸다.",`${X}을(를) 넣고 센 불에 볶는다.`,"간장으로 간하고 대파·참기름을 둘러 마무리한다."] },
+      { id:id++, gen:true, name:`${X}무침`, emoji:"🥗", time:10, level:"쉬움", servings:2, total:1550,
+        ing:[[X,"적당량",1000],["고춧가루","1작은술",200],["간장","1작은술",100],["식초","1작은술",100],["다진마늘","1작은술",100],["참기름","약간",150],["깨","약간",100]],
+        steps:[`${X}을(를) 끓는 물에 살짝 데친다.`,"찬물에 헹궈 물기를 짠다.","고춧가루·간장·식초·마늘로 무친다.","참기름과 깨를 뿌린다."] },
+      { id:id++, gen:true, name:`${X}된장국`, emoji:"🍲", time:20, level:"보통", servings:2, total:2100,
+        ing:[[X,"적당량",1000],["된장","1큰술",400],["두부","1/4모",400],["대파","약간",200],["다진마늘","1작은술",100]],
+        steps:["냄비에 물을 붓고 된장을 푼다.",`${X}을(를) 넣고 끓인다.`,"두부를 넣는다.","마늘·대파를 넣고 한소끔 더 끓인다."] },
+      { id:id++, gen:true, name:`${X}전`, emoji:"🥞", time:20, level:"쉬움", servings:2, total:2080,
+        ing:[[X,"적당량",1000],["밀가루","1컵",500],["계란","1개",400],["식용유","넉넉히",150],["소금","약간",30]],
+        steps:[`${X}을(를) 잘게 썬다.`,"밀가루·계란·물·소금으로 반죽한다.",`${X}을(를) 넣어 섞는다.`,"팬에 기름을 두르고 노릇하게 부친다."] }
+    );
+  });
+  return out;
+}
+
+/* ============================================================
+   App
+============================================================ */
+function App(){
+  const [tab, setTab] = useState("fridge");
+  const [fridge, setFridge] = useState(()=>load("fr_fridge", []));      // {name, qty, exp}
+  const [favs, setFavs] = useState(()=>load("fr_favs", []));            // [id]
+  const [logs, setLogs] = useState(()=>load("fr_logs", []));           // {id,recipe,date,memo,photo,cost}
+  const [checked, setChecked] = useState(()=>load("fr_checked", []));  // shopping checked names
+  const [settings, setSettings] = useState(()=>load("fr_settings", { dineOut:12000, urgentDays:3 }));
+  const [detail, setDetail] = useState(null);    // recipe object
+  const [logFor, setLogFor] = useState(null);     // recipe to log
+  const [shopFor, setShopFor] = useState(null);   // recipe → 맞춤 장보기 시트
+  const [toast, setToast] = useState("");
+
+  useEffect(()=>save("fr_fridge", fridge), [fridge]);
+  useEffect(()=>save("fr_favs", favs), [favs]);
+  useEffect(()=>save("fr_logs", logs), [logs]);
+  useEffect(()=>save("fr_checked", checked), [checked]);
+  useEffect(()=>save("fr_settings", settings), [settings]);
+
+  const showToast = (m)=>{ setToast(m); setTimeout(()=>setToast(""), 1700); };
+
+  const haveSet = useMemo(()=> new Set(fridge.map(f=>norm(f.name))), [fridge]);
+
+  /* 유통기한 임박 재료 (정상 보유 & urgentDays 이내) */
+  const urgentNames = useMemo(()=>{
+    const s = new Set();
+    fridge.forEach(f=>{ const d=daysLeft(f.exp); if(d!==null && d>=0 && d<=settings.urgentDays) s.add(norm(f.name)); });
+    return s;
+  }, [fridge, settings.urgentDays]);
+
+  /* 목록에 없는 재료로 자동 생성한 레시피 */
+  const genRecipes = useMemo(()=> generateForNovel(fridge), [fridge]);
+
+  /* 레시피별 매칭 계산 (기본 + 자동 생성) */
+  const analyzed = useMemo(()=>{
+    return [...RECIPES, ...genRecipes].map(r=>{
+      const have = [], miss = [];
+      r.ing.forEach(i=>{
+        const key = norm(i[0]);
+        if(haveSet.has(key)) have.push(i[0]); else miss.push(i[0]);
+      });
+      const matchRate = Math.round(have.length / r.ing.length * 100);
+      const usesUrgent = r.ing.some(i=>urgentNames.has(norm(i[0])));
+      const missCount = miss.length;
+      const tier = missCount===0 ? "full" : (missCount<=2 ? "near" : "more");
+      const perServ = Math.round(r.total / r.servings);
+      return { ...r, have, miss, matchRate, usesUrgent, missCount, tier, perServ };
+    });
+  }, [haveSet, urgentNames, genRecipes]);
+
+  return (
+    <div className="app">
+      <Header tab={tab} />
+      <main>
+        {tab==="fridge" && <FridgeTab fridge={fridge} setFridge={setFridge} settings={settings} showToast={showToast} />}
+        {tab==="recipes" && <RecipesTab analyzed={analyzed} favs={favs} setFavs={setFavs}
+                              urgentCount={urgentNames.size} setDetail={setDetail} setLogFor={setLogFor}
+                              setShopFor={setShopFor}
+                              fridgeEmpty={fridge.length===0} setTab={setTab} />}
+        {tab==="shop" && <ShopTab analyzed={analyzed} favs={favs} checked={checked} setChecked={setChecked} />}
+        {tab==="cost" && <CostTab logs={logs} settings={settings} setSettings={setSettings} />}
+        {tab==="log" && <LogTab logs={logs} setLogs={setLogs} setLogFor={setLogFor} showToast={showToast} />}
+      </main>
+
+      <TabBar tab={tab} setTab={setTab}
+        urgentCount={urgentNames.size}
+        shopCount={shoppingCount(analyzed, favs, checked)} />
+
+      {detail && <DetailSheet r={detail} haveSet={haveSet} urgentNames={urgentNames}
+                   onClose={()=>setDetail(null)} onCook={(r)=>{ setDetail(null); setLogFor(r); }} />}
+      {shopFor && <ShopSheet r={shopFor} haveSet={haveSet} checked={checked} setChecked={setChecked}
+                   onClose={()=>setShopFor(null)} />}
+      {logFor && <LogForm recipe={logFor} onClose={()=>setLogFor(null)}
+                   onSave={(entry)=>{ setLogs([entry, ...logs]); setLogFor(null); setTab("log"); showToast("요리 기록을 저장했어요 ✨"); }} />}
+      {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+/* 장보기 대상 개수 (즐겨찾기 or 1~2개 부족 레시피의 미보유 재료, 체크 안 한 것) */
+function shoppingCount(analyzed, favs, checked){
+  const names = collectShopping(analyzed, favs);
+  return names.filter(n=>!checked.includes(n)).length;
+}
+function collectShopping(analyzed, favs){
+  const map = {};
+  analyzed.forEach(r=>{
+    const include = favs.includes(r.id) || (r.missCount>=1 && r.missCount<=2);
+    if(include) r.miss.forEach(m=>{ (map[m]=map[m]||[]).push(r.name); });
+  });
+  return Object.keys(map).map(n=>n); // names only
+}
+
+/* ============================================================ */
+function Header({tab}){
+  const titles = {
+    fridge:["내 냉장고","가진 재료를 등록해 두세요"],
+    recipes:["레시피 추천","지금 만들 수 있는 요리"],
+    shop:["장보기 리스트","조금만 더 사면 되는 재료"],
+    cost:["식비 트래커","아낀 돈을 눈으로 확인"],
+    log:["요리 기록","오늘 만든 한 끼"],
+  };
+  const [t,s] = titles[tab];
+  return (
+    <header>
+      <div className="hbar">
+        <div>
+          <div className="eyebrow">냉장고 비우기</div>
+          <h1>{t}</h1>
+          <div className="sub">{s}</div>
+        </div>
+        <div className="fridge-ico">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* 냉장고 안쪽(본체) */}
+            <rect x="8" y="5" width="22" height="38" rx="4" fill="#16243a" stroke="#3fae7c" strokeWidth="2"/>
+            {/* 냉동/냉장 칸 구분선 */}
+            <line x1="8" y1="15.5" x2="30" y2="15.5" stroke="#3fae7c" strokeWidth="1.5" opacity="0.8"/>
+            {/* 선반 */}
+            <line x1="11" y1="26" x2="27" y2="26" stroke="#2c3e5b" strokeWidth="1.6"/>
+            <line x1="11" y1="34.5" x2="27" y2="34.5" stroke="#2c3e5b" strokeWidth="1.6"/>
+            {/* 냉동칸 재료 */}
+            <circle cx="14.5" cy="10.5" r="2.3" fill="#e26a5b"/>
+            <circle cx="20.5" cy="10.5" r="2.3" fill="#74d6a3"/>
+            {/* 선반1: 우유·과일 */}
+            <rect x="12" y="19.5" width="3.6" height="6" rx="1.2" fill="#b3c2d8"/>
+            <circle cx="20" cy="22.5" r="2.4" fill="#e2a44d"/>
+            <circle cx="25" cy="23" r="1.7" fill="#3fae7c"/>
+            {/* 선반2: 채소 */}
+            <circle cx="15" cy="30.5" r="2.4" fill="#e26a5b"/>
+            <circle cx="21.5" cy="30.5" r="2.4" fill="#74d6a3"/>
+            {/* 아래칸: 계란 */}
+            <circle cx="13.5" cy="39" r="1.7" fill="#f1c67c"/>
+            <circle cx="18" cy="39" r="1.7" fill="#f1c67c"/>
+            <circle cx="22.5" cy="39" r="1.7" fill="#f1c67c"/>
+            {/* 열린 문 */}
+            <g transform="rotate(22 30 24)">
+              <rect x="30" y="7" width="8" height="34" rx="3" fill="#172b46" stroke="#3fae7c" strokeWidth="2"/>
+              <line x1="35.5" y1="16" x2="35.5" y2="25" stroke="#74d6a3" strokeWidth="2" strokeLinecap="round"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function TabBar({tab, setTab, urgentCount, shopCount}){
+  const tabs = [
+    {k:"fridge", ic:"🧺", l:"냉장고"},
+    {k:"recipes", ic:"🍳", l:"레시피", badge:urgentCount},
+    {k:"shop", ic:"🛒", l:"장보기", badge:shopCount},
+    {k:"cost", ic:"💰", l:"식비"},
+    {k:"log", ic:"📔", l:"기록"},
+  ];
+  return (
+    <nav className="tabbar">
+      {tabs.map(t=>(
+        <button key={t.k} className={tab===t.k?"on":""} onClick={()=>setTab(t.k)}>
+          {t.badge>0 && <span className="badge">{t.badge}</span>}
+          <span className="ic">{t.ic}</span>
+          <span>{t.l}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+/* ============================================================
+   냉장고 탭
+============================================================ */
+function FridgeTab({fridge, setFridge, settings, showToast}){
+  const [custom, setCustom] = useState("");
+  const [editing, setEditing] = useState(null); // name
+
+  const has = (name)=> fridge.some(f=>f.name===name);
+  const toggle = (name)=>{
+    if(has(name)) setFridge(fridge.filter(f=>f.name!==name));
+    else setFridge([...fridge, { name, qty:"", exp:"" }]);
+  };
+  const addCustom = ()=>{
+    const v = custom.trim();
+    if(!v) return;
+    if(has(v)){ showToast("이미 있는 재료예요"); setCustom(""); return; }
+    setFridge([...fridge, { name:v, qty:"", exp:"" }]);
+    setCustom("");
+  };
+  const update = (name, patch)=> setFridge(fridge.map(f=>f.name===name?{...f,...patch}:f));
+  const remove = (name)=> setFridge(fridge.filter(f=>f.name!==name));
+
+  const expClass = (exp)=>{
+    const d = daysLeft(exp);
+    if(d===null) return null;
+    if(d<0) return ["gone","지남"];
+    if(d===0) return ["urgent","오늘까지"];
+    if(d<=settings.urgentDays) return ["urgent","D-"+d];
+    if(d<=7) return ["soon","D-"+d];
+    return ["ok","D-"+d];
+  };
+
+  return (
+    <div>
+      <div className="hint">탭해서 재료를 담고, 칸을 눌러 수량·유통기한을 적어 두세요. 곧 상할 재료를 레시피가 먼저 추천해 줍니다.</div>
+
+      {CATEGORIES.map(cat=>(
+        <div className="catrow" key={cat.name}>
+          <div className="catname">{cat.icon} {cat.name}</div>
+          <div className="chips">
+            {cat.items.map(it=>(
+              <button key={it} className={"chip"+(has(it)?" on":"")} onClick={()=>toggle(it)}>{it}</button>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div className="catrow">
+        <div className="catname">✏️ 직접 입력</div>
+        <div className="addrow">
+          <input value={custom} placeholder="예: 모닝글로리, 공심채, 파프리카…"
+            onChange={e=>setCustom(e.target.value)}
+            onKeyDown={e=>{ if(e.key==="Enter") addCustom(); }} />
+          <button onClick={addCustom}>담기</button>
+        </div>
+        <div className="hint" style={{marginTop:8,marginBottom:0}}>위 목록에 없는 재료(예: 모닝글로리)를 적어 담으면, 그 재료를 활용한 레시피(볶음·무침·국·전)를 자동으로 만들어 드려요 ✨</div>
+      </div>
+
+      <div className="section-title">🧺 내 냉장고 ({fridge.length})</div>
+      {fridge.length===0 ? (
+        <div className="empty"><div className="e-ic">🧺</div><div className="e-t">아직 비어 있어요</div>
+          <div className="e-d">위에서 가진 재료를 탭해 담아 보세요</div></div>
+      ) : (
+        <div className="card">
+          {fridge.map(f=>{
+            const ec = expClass(f.exp);
+            const open = editing===f.name;
+            return (
+              <div key={f.name}>
+                <div className="ing">
+                  <span className="nm">{f.name}</span>
+                  <div className="meta">
+                    {f.qty && <span className="qty">{f.qty}</span>}
+                    {ec && <span className={"exp "+ec[0]}>{ec[1]}</span>}
+                  </div>
+                  <button className="editbtn" onClick={()=>setEditing(open?null:f.name)}>{open?"▲":"✎"}</button>
+                  <button className="del" onClick={()=>remove(f.name)}>×</button>
+                </div>
+                {open && (
+                  <div style={{padding:"0 12px 8px"}}>
+                    <div className="editpanel">
+                      <div className="field">
+                        <label>보유 수량</label>
+                        <input value={f.qty} placeholder="예: 2개 / 1봉지 / 200g"
+                          onChange={e=>update(f.name,{qty:e.target.value})} />
+                      </div>
+                      <div className="field">
+                        <label>유통기한</label>
+                        <input type="date" value={f.exp}
+                          onChange={e=>update(f.name,{exp:e.target.value})} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   레시피 탭
+============================================================ */
+function RecipesTab({analyzed, favs, setFavs, urgentCount, setDetail, setLogFor, setShopFor, fridgeEmpty, setTab}){
+  const [fTime, setFTime] = useState(0);    // 0=전체, 15, 30
+  const [fLevel, setFLevel] = useState("전체");
+  const [fServ, setFServ] = useState(0);    // 0=전체, 1=1인분
+  const [onlyFav, setOnlyFav] = useState(false);
+
+  const toggleFav = (id)=> setFavs(favs.includes(id)?favs.filter(x=>x!==id):[...favs,id]);
+
+  const filtered = useMemo(()=>{
+    let list = analyzed.filter(r=>{
+      if(fTime===15 && r.time>15) return false;
+      if(fTime===30 && r.time>30) return false;
+      if(fLevel!=="전체" && r.level!==fLevel) return false;
+      if(fServ===1 && r.servings!==1) return false;
+      if(onlyFav && !favs.includes(r.id)) return false;
+      return true;
+    });
+    /* 정렬: 임박재료 사용 > 매칭률 높은 순 > 부족 적은 순 */
+    list.sort((a,b)=>{
+      if(a.usesUrgent!==b.usesUrgent) return a.usesUrgent?-1:1;
+      if(b.matchRate!==a.matchRate) return b.matchRate-a.matchRate;
+      return a.missCount-b.missCount;
+    });
+    return list;
+  }, [analyzed, fTime, fLevel, fServ, onlyFav, favs]);
+
+  const full = filtered.filter(r=>r.tier==="full");
+  const near = filtered.filter(r=>r.tier==="near");
+  const more = filtered.filter(r=>r.tier==="more");
+
+  return (
+    <div>
+      {fridgeEmpty &&
+        <div className="card" style={{padding:"13px 14px",marginBottom:14,fontSize:13,color:"var(--ink-soft)"}}>
+          냉장고가 비어 있어요. <b style={{color:"var(--accent)",cursor:"pointer"}} onClick={()=>setTab("fridge")}>재료 먼저 담기 →</b>
+        </div>}
+
+      {urgentCount>0 &&
+        <div className="card" style={{padding:"12px 14px",marginBottom:14,fontSize:13,background:"var(--amber-soft)",borderColor:"var(--amber)"}}>
+          ⏰ 곧 상하는 재료 <b>{urgentCount}개</b>가 있어요. 이 재료를 쓰는 레시피를 위로 올렸어요.
+        </div>}
+
+      <div className="filters" style={{marginBottom:8}}>
+        {[[0,"⏱ 시간 전체"],[15,"15분 이내"],[30,"30분 이내"]].map(([v,l])=>(
+          <button key={v} className={"fbtn"+(fTime===v?" on":"")} onClick={()=>setFTime(v)}>{l}</button>
+        ))}
+      </div>
+      <div className="filters" style={{marginBottom:8}}>
+        {["전체","쉬움","보통","어려움"].map(l=>(
+          <button key={l} className={"fbtn"+(fLevel===l?" on":"")} onClick={()=>setFLevel(l)}>{l==="전체"?"난이도 전체":l}</button>
+        ))}
+      </div>
+      <div className="filters">
+        <button className={"fbtn"+(fServ===1?" on":"")} onClick={()=>setFServ(fServ===1?0:1)}>🍽 1인분</button>
+        <button className={"fbtn"+(onlyFav?" on":"")} onClick={()=>setOnlyFav(!onlyFav)}>⭐ 즐겨찾기만</button>
+      </div>
+
+      {filtered.length===0 &&
+        <div className="empty"><div className="e-ic">🔍</div><div className="e-t">조건에 맞는 레시피가 없어요</div>
+          <div className="e-d">필터를 조금 풀어 보세요</div></div>}
+
+      {full.length>0 && <div className="section-title">✅ 바로 만들 수 있어요 ({full.length})</div>}
+      {full.map(r=><RecipeCard key={r.id} r={r} fav={favs.includes(r.id)} toggleFav={toggleFav} setDetail={setDetail} setLogFor={setLogFor} setShopFor={setShopFor} />)}
+
+      {near.length>0 && <div className="section-title">🛒 1~2개만 더 사면 돼요 ({near.length})</div>}
+      {near.map(r=><RecipeCard key={r.id} r={r} fav={favs.includes(r.id)} toggleFav={toggleFav} setDetail={setDetail} setLogFor={setLogFor} setShopFor={setShopFor} />)}
+
+      {more.length>0 && <div className="section-title">📋 재료를 더 채우면 ({more.length})</div>}
+      {more.map(r=><RecipeCard key={r.id} r={r} fav={favs.includes(r.id)} toggleFav={toggleFav} setDetail={setDetail} setLogFor={setLogFor} setShopFor={setShopFor} />)}
+    </div>
+  );
+}
+
+function RecipeCard({r, fav, toggleFav, setDetail, setLogFor, setShopFor}){
+  const fillColor = r.tier==="full"?"var(--green)":(r.tier==="near"?"var(--amber)":"var(--muted)");
+  return (
+    <div className="card rcard">
+      <div className="toprow">
+        <div style={{display:"flex",gap:11,alignItems:"flex-start"}}>
+          <span className="emoji">{r.emoji}</span>
+          <div>
+            <h3>{r.name}</h3>
+            <div className="tagline">
+              <span>⏱ <b>{r.time}분</b></span>
+              <span>📊 <b>{r.level}</b></span>
+              <span>🍽 <b>{r.servings}인분</b></span>
+            </div>
+          </div>
+        </div>
+        <button className={"star"+(fav?" on":"")} onClick={()=>toggleFav(r.id)}>{fav?"★":"☆"}</button>
+      </div>
+
+      <div className="matchbar">
+        <div className="lbl"><span>재료 매칭</span><span className="pct" style={{color:fillColor}}>{r.matchRate}%</span></div>
+        <div className="track"><div className="fill" style={{width:r.matchRate+"%",background:fillColor}}></div></div>
+      </div>
+
+      <div className="badges">
+        {r.tier==="full" && <span className="b full">완전 매칭</span>}
+        {r.tier==="near" && <span className="b near">{r.missCount}개 부족</span>}
+        {r.tier==="more" && <span className="b cost">{r.missCount}개 부족</span>}
+        {r.usesUrgent && <span className="b urgent">⏰ 임박재료 활용</span>}
+        {r.gen && <span className="b" style={{background:"var(--green-soft)",color:"var(--green-ink)"}}>✨ 새 재료 레시피</span>}
+        <span className="b cost">한 끼 {won(r.perServ)}</span>
+      </div>
+
+      <div className="haverow">
+        {r.miss.length>0 ? (
+          <><span className="lab">필요:</span>
+            {r.miss.map(m=><span key={m} className="ig miss">{m}</span>)}</>
+        ) : (
+          <span style={{color:"var(--green-ink)",fontWeight:600,fontSize:13}}>가진 재료로 충분해요 👍</span>
+        )}
+      </div>
+
+      <div className="actions">
+        <button className="btn-ghost" onClick={()=>setDetail(r)}>레시피</button>
+        <button className="btn-ghost" onClick={()=>setShopFor(r)}>🛒 장보기</button>
+        <button className="btn-prime" onClick={()=>setLogFor(r)}>만들었어요</button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   레시피 상세 시트
+============================================================ */
+/* ============================================================
+   레시피별 맞춤 장보기 시트 (부족한 재료만)
+============================================================ */
+function ShopSheet({r, haveSet, checked, setChecked, onClose}){
+  const miss = r.ing.filter(i=>!haveSet.has(norm(i[0])));
+  const cost = miss.reduce((s,i)=>s+i[2],0);
+  const toggle = (n)=> setChecked(checked.includes(n)?checked.filter(x=>x!==n):[...checked,n]);
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="sheet" onClick={e=>e.stopPropagation()}>
+        <div className="shead">
+          <div>
+            <h2>🛒 {r.name}</h2>
+            <div className="detail-tags">
+              <span>부족한 재료 {miss.length}개</span>
+              {miss.length>0 && <span>추가 비용 약 {won(cost)}</span>}
+            </div>
+          </div>
+          <button className="closeb" onClick={onClose}>×</button>
+        </div>
+        <div className="sbody">
+          {miss.length===0 ? (
+            <div className="empty">
+              <div className="e-ic">🧺</div>
+              <div className="e-t">장바구니가 비어 있어요!</div>
+              <div className="e-d">가진 재료로 다 만들 수 있어요 👍</div>
+            </div>
+          ) : (
+            <>
+              <div className="hint">이 요리에 필요한데 냉장고에 없는 재료예요. 장 보면서 하나씩 체크해 보세요.</div>
+              <div className="card">
+                {miss.map(i=>{
+                  const n = i[0]; const done = checked.includes(n);
+                  return (
+                    <div key={n} className={"shop-item"+(done?" done":"")} onClick={()=>toggle(n)}>
+                      <div className={"checkbox"+(done?" on":"")}>{done?"✓":""}</div>
+                      <div className="nm">{n}</div>
+                      <div className="from">{i[1]} · 약 {won(i[2])}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailSheet({r, haveSet, urgentNames, onClose, onCook}){
+  const perServ = Math.round(r.total/r.servings);
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="sheet" onClick={e=>e.stopPropagation()}>
+        <div className="shead">
+          <div>
+            <h2>{r.emoji} {r.name}</h2>
+            <div className="detail-tags">
+              <span>⏱ {r.time}분</span><span>📊 {r.level}</span><span>🍽 {r.servings}인분</span>
+            </div>
+          </div>
+          <button className="closeb" onClick={onClose}>×</button>
+        </div>
+        <div className="sbody">
+          <div className="dsec-title">예상 식비</div>
+          <div className="costbox">
+            <div className="lab">한 끼(1인분) 기준</div>
+            <div className="big">{won(perServ)}</div>
+            <div className="vs">전체 {r.servings}인분 재료비 약 {won(r.total)}</div>
+          </div>
+
+          <div className="dsec-title">재료 ({r.ing.length})</div>
+          {r.ing.map((i,idx)=>{
+            const have = haveSet.has(norm(i[0]));
+            const urgent = urgentNames.has(norm(i[0]));
+            return (
+              <div key={idx} className={"ing-line"+(have?"":" miss")}>
+                <span className="nm">{have?"✓ ":"○ "}{i[0]} {urgent && <span style={{color:"var(--amber-ink)",fontSize:11}}>⏰</span>} <span style={{color:"var(--muted)",fontSize:12.5,fontWeight:400}}>{i[1]}</span></span>
+                <span className="price">{won(i[2])}</span>
+              </div>
+            );
+          })}
+
+          <div className="dsec-title">만드는 법</div>
+          {r.steps.map((s,idx)=>(
+            <div className="step" key={idx}><span className="n">{idx+1}</span><span>{s}</span></div>
+          ))}
+
+          <button className="savebtn" style={{marginTop:22}} onClick={()=>onCook(r)}>이 요리 만들었어요 📔</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   장보기 탭
+============================================================ */
+function ShopTab({analyzed, favs, checked, setChecked}){
+  /* 미보유 재료 → {재료: [레시피명...]} */
+  const map = useMemo(()=>{
+    const m = {};
+    analyzed.forEach(r=>{
+      const include = favs.includes(r.id) || (r.missCount>=1 && r.missCount<=2);
+      if(include) r.miss.forEach(name=>{ (m[name]=m[name]||new Set()).add(r.name); });
+    });
+    return m;
+  }, [analyzed, favs]);
+
+  const names = Object.keys(map).sort((a,b)=> map[b].size - map[a].size);
+  const toggle = (n)=> setChecked(checked.includes(n)?checked.filter(x=>x!==n):[...checked,n]);
+  const clearDone = ()=> setChecked(checked.filter(n=>!names.includes(n)));
+
+  return (
+    <div>
+      <div className="hint">즐겨찾기한 레시피와 ‘1~2개만 부족’한 레시피에서 빠진 재료를 모았어요. 여러 요리에 쓰이는 재료가 위로 옵니다.</div>
+      {names.length===0 ? (
+        <div className="empty"><div className="e-ic">🛒</div><div className="e-t">살 게 없어요!</div>
+          <div className="e-d">가진 재료로 충분하거나, 레시피를 즐겨찾기 해보세요</div></div>
+      ) : (
+        <>
+          <div className="card" style={{marginBottom:10}}>
+            {names.map(n=>{
+              const done = checked.includes(n);
+              const fromList = Array.from(map[n]);
+              return (
+                <div key={n} className={"shop-item"+(done?" done":"")} onClick={()=>toggle(n)}>
+                  <div className={"checkbox"+(done?" on":"")}>{done?"✓":""}</div>
+                  <div>
+                    <div className="nm">{n}</div>
+                  </div>
+                  <div className="from">
+                    {fromList.length>1 ? `${fromList.length}개 요리에` : fromList[0]}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <button className="btn-ghost" style={{width:"100%",padding:12,borderRadius:12,border:"1px solid var(--line)",fontWeight:600,color:"var(--ink-soft)",background:"var(--card)"}}
+            onClick={clearDone}>담은 항목 비우기</button>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   식비 트래커 탭
+============================================================ */
+function CostTab({logs, settings, setSettings}){
+  const [range, setRange] = useState("week");
+
+  const now = new Date();
+  const inRange = (dateStr)=>{
+    const d = new Date(dateStr+"T00:00:00");
+    if(range==="week"){
+      const diff = (now - d)/86400000;
+      return diff>=0 && diff<7;
+    } else {
+      return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+    }
+  };
+  const filtered = logs.filter(l=>inRange(l.date));
+  const meals = filtered.length;
+  const homeCost = filtered.reduce((s,l)=>s+(l.cost||0),0);
+  const dineOutCost = meals * settings.dineOut;
+  const saved = dineOutCost - homeCost;
+  const avg = meals? Math.round(homeCost/meals) : 0;
+
+  return (
+    <div>
+      <div className="seg">
+        <button className={range==="week"?"on":""} onClick={()=>setRange("week")}>이번 주</button>
+        <button className={range==="month"?"on":""} onClick={()=>setRange("month")}>이번 달</button>
+      </div>
+
+      <div className="statgrid">
+        <div className="card stat"><div className="v">{meals}끼</div><div className="k">집밥 횟수</div></div>
+        <div className="card stat"><div className="v">{won(homeCost)}</div><div className="k">총 식비</div><div className="sub">한 끼 평균 {won(avg)}</div></div>
+      </div>
+      <div className="card stat" style={{marginBottom:14}}>
+        <div className="v save">{won(Math.max(saved,0))}</div>
+        <div className="k">외식 대비 절감액 ({range==="week"?"이번 주":"이번 달"})</div>
+        <div className="sub">외식이라면 {won(dineOutCost)} 들었을 거예요</div>
+      </div>
+
+      {saved>0 &&
+        <div className="card" style={{padding:"13px 15px",marginBottom:14,background:"var(--green-soft)",borderColor:"var(--green)",fontSize:13.5,color:"var(--green-ink)",lineHeight:1.6}}>
+          🌱 집에서 해 먹어 <b>{won(saved)}</b>을 아꼈어요.
+          {range==="week" && saved>0 && <> 이대로면 한 달에 약 <b>{won(saved*4)}</b>.</>}
+        </div>}
+
+      <div className="section-title">⚙️ 기준 설정</div>
+      <div className="card">
+        <div className="setting-row">
+          <span>외식 한 끼 평균 비용</span>
+          <input type="number" value={settings.dineOut}
+            onChange={e=>setSettings({...settings, dineOut:Number(e.target.value)||0})} />
+        </div>
+        <div style={{height:1,background:"var(--line-soft)"}}></div>
+        <div className="setting-row">
+          <span>유통기한 임박 기준 (일)</span>
+          <input type="number" value={settings.urgentDays}
+            onChange={e=>setSettings({...settings, urgentDays:Number(e.target.value)||0})} />
+        </div>
+      </div>
+      <div className="hint" style={{marginTop:10}}>‘만들었어요’로 기록한 요리의 1인분 단가가 자동으로 합산됩니다. 외식 단가를 바꾸면 절감액이 다시 계산돼요.</div>
+    </div>
+  );
+}
+
+/* ============================================================
+   요리 기록 탭
+============================================================ */
+function LogTab({logs, setLogs, setLogFor, showToast}){
+  const remove = (id)=>{ setLogs(logs.filter(l=>l.id!==id)); showToast("기록을 지웠어요"); };
+  return (
+    <div>
+      {logs.length===0 ? (
+        <div className="empty"><div className="e-ic">📔</div><div className="e-t">아직 기록이 없어요</div>
+          <div className="e-d">레시피에서 ‘만들었어요’를 눌러<br/>오늘의 한 끼를 남겨 보세요</div></div>
+      ) : (
+        logs.map(l=>(
+          <div key={l.id} className="card logcard">
+            {l.photo && <img src={l.photo} alt={l.recipe} />}
+            <div className="lc-body">
+              <div className="lc-top"><h3>{l.recipe}</h3><span className="date">{l.date}</span></div>
+              {l.memo && <div className="memo">{l.memo}</div>}
+              {l.cost>0 && <div className="lc-cost">식비 {won(l.cost)}</div>}
+              <div className="lc-del" onClick={()=>remove(l.id)}>삭제</div>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+function LogForm({recipe, onClose, onSave}){
+  const [memo, setMemo] = useState("");
+  const [photo, setPhoto] = useState("");
+  const [cost, setCost] = useState(Math.round(recipe.total/recipe.servings));
+  const fileRef = useRef();
+
+  const onFile = (e)=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ev=> setPhoto(ev.target.result);
+    reader.readAsDataURL(f);
+  };
+  const submit = ()=>{
+    onSave({ id:Date.now(), recipe:recipe.name, date:todayStr(), memo:memo.trim(), photo, cost:Number(cost)||0 });
+  };
+
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="sheet" onClick={e=>e.stopPropagation()}>
+        <div className="shead">
+          <h2>📔 {recipe.name} 기록</h2>
+          <button className="closeb" onClick={onClose}>×</button>
+        </div>
+        <div className="sbody logform">
+          <div className="field-col">
+            <label className="fl">사진</label>
+            <div className="photo-drop" onClick={()=>fileRef.current.click()}>
+              {photo ? <img src={photo} alt="요리 사진" /> : "📷 사진 추가하기 (선택)"}
+            </div>
+            <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={onFile} />
+          </div>
+          <div className="field-col">
+            <label className="fl">한 줄 메모</label>
+            <textarea value={memo} placeholder="간 조절, 다음엔 이렇게… 자유롭게 적어요"
+              onChange={e=>setMemo(e.target.value)} />
+          </div>
+          <div className="field-col">
+            <label className="fl">이번 한 끼 식비 (원)</label>
+            <input type="text" inputMode="numeric" value={cost} onChange={e=>setCost(e.target.value.replace(/[^0-9]/g,""))} />
+          </div>
+          <button className="savebtn" onClick={submit}>기록 저장</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+<script>
+  // @babel/standalone 기본 react preset은 automatic 런타임(import 구문)을 내보내
+  // UMD React + 브라우저 환경에서 깨진다. classic 런타임으로 직접 변환·실행한다.
+  (function(){
+    var src = document.getElementById("app-src").textContent;
+    try {
+      var compiled = Babel.transform(src, { presets: [["react", { runtime: "classic" }]] }).code;
+      (0, eval)(compiled);
+    } catch (e) {
+      document.getElementById("root").innerHTML =
+        '<pre style="padding:20px;color:#c25b4e;white-space:pre-wrap;font-size:13px">앱 로딩 오류: ' +
+        (e && e.message ? e.message : e) + '</pre>';
+      console.error(e);
+    }
+  })();
+</script>
+</body>
+</html>
