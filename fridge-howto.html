@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>냉장고 파먹기 앱 — 프롬프트로 만든 과정</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f3ec; --card:#fffdf8; --ink:#312b22; --ink-soft:#5f574a; --muted:#9b9285;
+    --line:#e7e0d2; --line-soft:#f0ebe0;
+    /* 화자 구분 색 */
+    --me:#b5683f; --me-soft:#fbeee5; --me-line:#efd9c9; --me-ink:#8a4a28;
+    --ai:#3f6b96; --ai-soft:#e9f0f7; --ai-ink:#2c4d6e;
+    --accent:#5f8a5f; --accent-soft:#e9f1e6;
+    --serif:'Gowun Batang',serif; --sans:'Noto Sans KR',sans-serif;
+    --shadow:0 1px 3px rgba(80,60,30,.06),0 6px 20px rgba(80,60,30,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--paper);line-height:1.7;
+       -webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{font-family:var(--serif);margin:0;font-weight:700;letter-spacing:-.3px}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px 80px}
+
+  /* ===== Hero ===== */
+  header{text-align:center;padding:64px 20px 30px}
+  header .eyebrow{font-size:12px;letter-spacing:5px;color:var(--accent);font-weight:700}
+  header h1{font-size:clamp(30px,6vw,46px);margin:16px 0 10px;line-height:1.25}
+  header .sub{font-family:var(--serif);color:var(--ink-soft);font-size:17px}
+  header .by{font-size:13px;color:var(--muted);margin-top:16px}
+  header .divider{width:48px;height:2px;background:var(--accent);opacity:.5;margin:26px auto 0}
+
+  .lead{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;
+        box-shadow:var(--shadow);font-size:15px;color:var(--ink-soft);margin-bottom:34px}
+  .lead b{color:var(--ink)}
+
+  h2.section{font-size:22px;margin:48px 0 6px;display:flex;align-items:center;gap:9px}
+  h2.section .num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+        background:var(--accent);color:#fff;border-radius:9px;font-size:15px;flex-shrink:0}
+  .section-desc{color:var(--muted);font-size:14px;margin:0 0 20px 39px}
+
+  /* ===== 흐름 다이어그램 ===== */
+  .flow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:28px 0 10px}
+  .flow .step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 14px;
+        text-align:center;box-shadow:var(--shadow);position:relative}
+  .flow .step .ic{font-size:30px;display:block;margin-bottom:8px}
+  .flow .step .t{font-family:var(--serif);font-weight:700;font-size:15px;margin-bottom:5px}
+  .flow .step .d{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .flow .step .tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:10.5px;
+        font-weight:700;padding:2px 9px;border-radius:9px;white-space:nowrap}
+  .tag-me{background:var(--me-soft);color:var(--me-ink)}
+  .tag-ai{background:var(--ai-soft);color:var(--ai-ink)}
+  .tag-both{background:var(--accent-soft);color:var(--accent)}
+  @media(max-width:560px){ .flow{grid-template-columns:1fr} }
+
+  /* ===== 범례 ===== */
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:30px 0 8px}
+  .legend .lg{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
+        border-radius:11px;padding:9px 14px;font-size:13px;font-weight:500}
+  .dot{width:13px;height:13px;border-radius:50%;flex-shrink:0}
+  .dot.me{background:var(--me)} .dot.ai{background:var(--ai)}
+
+  /* ===== 말풍선 / 프롬프트 카드 ===== */
+  .bubble{border-radius:14px;padding:16px 18px;margin:14px 0;box-shadow:var(--shadow);position:relative}
+  .bubble .who{font-size:11.5px;font-weight:700;letter-spacing:.3px;margin-bottom:9px;
+        display:flex;align-items:center;gap:7px}
+  .bubble .who .chip{padding:2px 9px;border-radius:8px;font-size:10.5px}
+  .bubble.me{background:var(--me-soft);border:1px solid #efd9c9;border-left:4px solid var(--me)}
+  .bubble.me .who{color:var(--me-ink)}
+  .bubble.me .who .chip{background:var(--me);color:#fff}
+  .bubble.ai{background:var(--ai-soft);border:1px solid #d4e2ef;border-left:4px solid var(--ai)}
+  .bubble.ai .who{color:var(--ai-ink)}
+  .bubble.ai .who .chip{background:var(--ai);color:#fff}
+  .bubble .text{font-size:15px;color:var(--ink);white-space:pre-wrap;word-break:keep-all}
+
+  /* verbatim 프롬프트(코드형) */
+  .verbatim{background:#2b2f38;color:#e8ebef;border-radius:12px;padding:18px 20px;margin:14px 0 6px;
+        font-family:'Noto Sans KR',monospace;font-size:13px;line-height:1.75;white-space:pre-wrap;
+        word-break:keep-all;border:1px solid #3a3f4a;overflow-x:auto}
+  .verbatim .vh{display:block;color:#8fb8e6;font-weight:700;font-size:11.5px;letter-spacing:.5px;margin-bottom:10px}
+  .copynote{font-size:12px;color:var(--muted);margin:4px 2px 0}
+
+  /* 변경 결과 */
+  .result{display:flex;gap:9px;align-items:flex-start;margin:8px 0 4px 4px;font-size:13.5px;color:var(--ink-soft)}
+  .result .ar{color:var(--accent);font-weight:700;flex-shrink:0}
+  .result b{color:var(--ink)}
+
+  /* 점검 번호 항목 */
+  .turn{margin:26px 0}
+  .turn .turn-h{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:2px}
+
+  /* ===== 마무리 ===== */
+  .takeaways{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px 4px;
+        box-shadow:var(--shadow);margin-top:14px}
+  .takeaways .ta{display:flex;gap:13px;padding:16px 20px;border-bottom:1px solid var(--line-soft)}
+  .takeaways .ta:last-child{border-bottom:none}
+  .takeaways .ta .n{font-family:var(--serif);font-weight:700;color:var(--accent);font-size:19px;flex-shrink:0;width:22px}
+  .takeaways .ta .body .tt{font-weight:700;font-size:15px;margin-bottom:3px}
+  .takeaways .ta .body .td{font-size:13.5px;color:var(--ink-soft)}
+
+  footer{text-align:center;margin-top:54px;padding-top:26px;border-top:1px solid var(--line);
+        color:var(--muted);font-size:13px}
+  footer .app-link{display:inline-block;margin-top:10px;font-size:13.5px;color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">디퍼 언브랜딩 살롱 · 공유 자료</div>
+  <h1>냉장고 파먹기 앱,<br/>프롬프트로 만든 과정</h1>
+  <div class="sub">코딩 한 줄 없이, 대화만으로 앱 하나가 자라기까지</div>
+  <div class="by">sweetwater · 캄보디아 프놈펜</div>
+  <div class="divider"></div>
+</header>
+
+<div class="wrap">
+
+  <div class="lead">
+    식비를 아끼려고 <b>냉장고 속 재료로 요리하는 앱</b>을 만들고 싶었습니다.
+    그런데 저는 코드를 모릅니다. 그래서 한 일은 단 두 가지 —
+    <b>① AI에게 ‘프롬프트 자체’를 먼저 만들게 하고</b>,
+    <b>② 그 프롬프트를 실행시킨 뒤 자연어로 고쳐 나간 것</b>뿐입니다.
+    아래는 그 대화의 전 과정입니다. <b>제가 한 말</b>과 <b>클로드가 만든 프롬프트</b>를 색으로 구분해 두었어요.
+  </div>
+
+  <!-- ===== 한눈에 보는 흐름 ===== -->
+  <h2 class="section"><span class="num">✦</span>한눈에 보는 흐름</h2>
+  <p class="section-desc">세 걸음이면 충분했습니다.</p>
+  <div class="flow">
+    <div class="step">
+      <span class="tag tag-me">내가 → 클로드챗</span>
+      <span class="ic">💬</span>
+      <div class="t">1. 프롬프트 만들기</div>
+      <div class="d">“이런 앱을 만들고 싶은데, 프롬프트로 정리해줘”라고 부탁</div>
+    </div>
+    <div class="step">
+      <span class="tag tag-both">복사 → 클로드코드</span>
+      <span class="ic">📋</span>
+      <div class="t">2. 코드로 옮겨 실행</div>
+      <div class="d">내 ‘왜(why)’를 앞에 적고, 받은 프롬프트를 그대로 붙여넣기</div>
+    </div>
+    <div class="step">
+      <span class="tag tag-me">내가 → 클로드코드</span>
+      <span class="ic">🛠️</span>
+      <div class="t">3. 자연어로 점검·개선</div>
+      <div class="d">“이건 이렇게 바꿔줘”를 여섯 번. 앱이 점점 자람</div>
+    </div>
+  </div>
+
+  <!-- 범례 -->
+  <div class="legend">
+    <div class="lg"><span class="dot me"></span> <b>내 프롬프트</b> (사용자)</div>
+    <div class="lg"><span class="dot ai"></span> <b>클로드의 프롬프트</b> (AI)</div>
+  </div>
+
+  <!-- ===== STEP 1 ===== -->
+  <h2 class="section"><span class="num">1</span>프롬프트를 ‘만들어 달라’고 했다</h2>
+  <p class="section-desc">막연한 생각을 클로드 챗에게 던지고, 정리된 프롬프트를 받았습니다.</p>
+
+  <div class="bubble me">
+    <div class="who"><span class="chip">내 프롬프트</span> 클로드 챗에게</div>
+    <div class="text">내가 식비를 아끼기 위해 냉장고 안에 음식재료로 요리를 만드는 앱을 만들려고 해. 어떤 요소를 넣으면 편리하게 사용할 수 있을까? 프롬프트로 만들어줘.</div>
+  </div>
+
+  <div class="bubble ai">
+    <div class="who"><span class="chip">클로드 답</span> 핵심 요소부터 정리해 줌</div>
+    <div class="text">냉장고 재료 활용 레시피 앱, 좋은 아이디어예요. 편의성을 높이려면 아래 요소들을 핵심으로 넣는 게 좋아요.
+
+<b>1) 재료 입력/관리</b>
+· 카테고리별 빠른 선택(채소/육류/유제품 등) + 직접 입력
+· 유통기한 입력 및 임박 알림
+· 보유 수량 관리(다 썼으면 자동 차감)
+
+<b>2) 레시피 추천 로직</b>
+· 완전 매칭 vs 부족한 재료 1~2개만 있는 “거의 매칭” 구분 표시
+· 유통기한 임박 재료 우선 활용 레시피 우선순위 노출
+· 조리시간/난이도/인분수 필터
+· 부족한 재료만 모아서 장보기 리스트 자동 생성
+
+<b>3) 식비 절약 특화 기능</b>
+· 재료별 단가 입력 → 한 끼 예상 비용 계산
+· 주간/월간 식비 트래커(외식 대비 절감액 시각화)
+· 장보기 리스트(마트별 가격 비교는 선택 기능)
+
+<b>4) 사용자 편의</b>
+· 즐겨찾기 + 만든 요리 기록(사진+메모)
+· 1인분/소량 조리 옵션
+· 음성 입력(장 보고 와서 손 바쁠 때 유용)
+
+<b>5) UI/UX</b>
+· 모바일 우선, 카드형 레시피 뷰
+· 한식/아시안 레시피 데이터베이스 기반</div>
+  </div>
+
+  <p class="copynote">그리고 클로드가 ‘바로 복사해 쓸 수 있는 프롬프트’를 만들어 주었습니다. 아래가 그 프롬프트 원문입니다 ↓</p>
+
+  <div class="verbatim"><span class="vh">🤖 클로드가 만든 프롬프트 (원문 그대로)</span>냉장고 속 재료로 식비를 절약하는 레시피 추천 웹앱을 만들어줘.
+
+[핵심 기능]
+1. 재료 입력: 카테고리별(채소/육류/유제품/곡류/소스 등) 빠른 선택 + 직접 입력,
+   유통기한과 보유 수량 함께 등록
+2. 레시피 추천: 보유 재료와 매칭률이 높은 순으로 레시피 정렬,
+   "완전 매칭"과 "재료 1~2개만 부족"인 레시피를 구분해서 보여줄 것
+3. 유통기한 임박 재료 우선 활용: 곧 상할 재료가 들어간 레시피를 상단에 노출
+4. 부족한 재료 자동 추출 → 장보기 리스트 생성
+5. 식비 트래커: 재료 단가를 입력하면 한 끼 예상 비용을 계산하고,
+   주간/월간 식비 합계와 외식 대비 절감액을 보여줄 것
+6. 필터: 조리시간, 난이도, 인분수(1인분 옵션 포함)
+7. 즐겨찾기 저장 + 만든 요리 기록(사진, 메모)
+
+[데이터]
+- 한식/아시안 레시피 위주 샘플 데이터베이스 포함 (최소 15~20개)
+- 재료, 조리시간, 난이도, 인분, 단계별 조리법, 예상 단가 포함
+
+[UI/UX]
+- 모바일 우선 반응형, 카드형 레시피 리스트
+- 재료 입력은 최소 클릭으로 빠르게 가능하도록
+- 깔끔하고 직관적인 디자인, 과도한 장식 없이
+
+React로 작성하고, 인터랙티브하게 재료 추가/삭제, 필터링, 레시피 상세보기가
+바로 동작하도록 만들어줘.</div>
+
+  <!-- ===== STEP 2 ===== -->
+  <h2 class="section"><span class="num">2</span>코드로 옮기며 ‘왜’를 앞에 적었다</h2>
+  <p class="section-desc">클로드 코드(개발용)로 자리를 옮겨, 내가 이걸 왜 만드는지를 먼저 밝히고 — 받은 프롬프트를 그대로 붙여넣었습니다.</p>
+
+  <div class="bubble me">
+    <div class="who"><span class="chip">내 프롬프트</span> 클로드 코드에게 — 나의 why + 붙여넣은 프롬프트</div>
+    <div class="text">나는 식비를 절약하고 싶어. 냉장고 안에 재료가 잔뜩 있지만 막상 뭘 만들어 먹어야 할지 모르겠어. 그래서 냉장고 안에 있는 재료를 사용해서 다양한 음식을 만들고 싶어. 아래 프롬프트를 참고해서 만들어줘.
+
+<span style="opacity:.7">( ↑ 나의 why &nbsp;|&nbsp; 그 아래에 STEP 1에서 받은 클로드의 프롬프트를 그대로 붙여넣음 )</span></div>
+  </div>
+
+  <div class="result"><span class="ar">→</span><div>처음 결과물: 핵심 기능 7가지를 갖춘 앱이 만들어졌습니다. 다만 레시피는 <b>20개</b>뿐. 여기서부터 ‘점검’이 시작됩니다.</div></div>
+
+  <!-- ===== STEP 3 ===== -->
+  <h2 class="section"><span class="num">3</span>자연어로 여섯 번 고쳤다</h2>
+  <p class="section-desc">아래는 제가 실제로 입력한 말 그대로입니다. (오탈자도 그대로 두었어요.) 전문 용어 없이, 친구에게 말하듯 부탁했을 뿐입니다.</p>
+
+  <div class="turn">
+    <div class="turn-h">점검 ①</div>
+    <div class="bubble me"><div class="who"><span class="chip">내 프롬프트</span></div>
+      <div class="text">레시피가 20개 밖에 안된다는 거야?</div></div>
+    <div class="result"><span class="ar">→</span><div>레시피가 부족하다는 걸 짚자, 더 채울지 되물어 왔습니다.</div></div>
+  </div>
+
+  <div class="turn">
+    <div class="turn-h">점검 ②</div>
+    <div class="bubble me"><div class="who"><span class="chip">내 프롬프트</span></div>
+      <div class="text">100개로 만들어 주고 1인분 간단 요리를 더 추가해 줘. 밑반찬도 넣어줘.</div></div>
+    <div class="result"><span class="ar">→</span><div>레시피가 <b>100개</b>로. 혼밥용 1인분 요리와 밑반찬이 대거 추가됐습니다.</div></div>
+  </div>
+
+  <div class="turn">
+    <div class="turn-h">점검 ③</div>
+    <div class="bubble me"><div class="who"><span class="chip">내 프롬프트</span></div>
+      <div class="text">하나만 더! 바탕을 짙은 푸른색으로 하고 거기에 맞는 색깔로 다른 것들도 조정해줘.</div></div>
+    <div class="result"><span class="ar">→</span><div>전체가 <b>짙은 남색 다크 테마</b>로. 글자·강조색까지 거기에 맞춰 다시 입혀졌습니다.</div></div>
+  </div>
+
+  <div class="turn">
+    <div class="turn-h">점검 ④</div>
+    <div class="bubble me"><div class="who"><span class="chip">내 프롬프트</span></div>
+      <div class="text">레시피 목록에서 내가 만들고 싶은 것을 누르면 그 요리에 맞춘 장보기가 뜨게 해줘. 100%이면 장바구니가 비어 있겠지. 그리고 냉장고 아이콘 헤더에 예쁘게 하나 넣어줘. 냉장고가 열려 있는 모습이고 안에 재료가 있는 그림으로</div></div>
+    <div class="result"><span class="ar">→</span><div>레시피별 <b>맞춤 장보기 시트</b>가 생겼습니다(완전 매칭이면 “빈 장바구니”). 헤더엔 <b>문 열린 냉장고 그림</b>이 그려졌고요.</div></div>
+  </div>
+
+  <div class="turn">
+    <div class="turn-h">점검 ⑤</div>
+    <div class="bubble me"><div class="who"><span class="chip">내 프롬프트</span></div>
+      <div class="text">헤더의 그림을 오른쪽 빈칸으로 옮겨줘.</div></div>
+    <div class="result"><span class="ar">→</span><div>냉장고 아이콘이 헤더 <b>오른쪽 끝</b>으로 이동했습니다.</div></div>
+  </div>
+
+  <div class="turn">
+    <div class="turn-h">점검 ⑥</div>
+    <div class="bubble me"><div class="who"><span class="chip">내 프롬프트</span></div>
+      <div class="text">위에 재료 선택하기 아래 직접 입력하기에는 위에 없는 재료를 추가해서 넣을 수 있도록 만들어줘. 그리고 그것도 참고해서 레시피가 창출되도록 해줘. 예를 ㄷ거ㅡ들어 모닝글로리를 치면 모닝글로리 활용한 레시피가 뜨도록</div></div>
+    <div class="result"><span class="ar">→</span><div>목록에 없는 재료(예: <b>모닝글로리</b>)를 직접 담으면, 그 재료를 활용한 레시피(볶음·무침·국·전)가 <b>자동 생성</b>되게 했습니다.</div></div>
+  </div>
+
+  <!-- ===== 마무리 ===== -->
+  <h2 class="section"><span class="num">★</span>이 과정에서 배운 것</h2>
+  <p class="section-desc">코딩이 아니라, ‘부탁하는 법’이 전부였습니다.</p>
+  <div class="takeaways">
+    <div class="ta"><div class="n">1</div><div class="body">
+      <div class="tt">프롬프트도 AI에게 만들게 할 수 있다</div>
+      <div class="td">막연할 땐 “이런 걸 만들고 싶은데 프롬프트로 정리해줘”라고 먼저 부탁하세요. 좋은 지시문이 절반입니다.</div></div></div>
+    <div class="ta"><div class="n">2</div><div class="body">
+      <div class="tt">‘왜(why)’를 맨 앞에 적는다</div>
+      <div class="td">“식비를 아끼고 싶고, 재료는 많은데 뭘 할지 모르겠다.” 이유를 밝히면 AI가 빈칸을 더 잘 메웁니다.</div></div></div>
+    <div class="ta"><div class="n">3</div><div class="body">
+      <div class="tt">한 번에 완벽하지 않아도 된다</div>
+      <div class="td">처음엔 레시피 20개짜리였습니다. 자연어로 여섯 번 고치니 100개·다크테마·자동 레시피 생성까지 자랐어요.</div></div></div>
+    <div class="ta"><div class="n">4</div><div class="body">
+      <div class="tt">전문 용어는 필요 없다</div>
+      <div class="td">“바탕을 짙은 푸른색으로”, “오른쪽 빈칸으로 옮겨줘” — 친구에게 말하듯 부탁하면 됩니다. 오탈자가 있어도요.</div></div></div>
+  </div>
+
+  <footer>
+    이 자료는 제가 클로드와 나눈 실제 대화를 정리한 것입니다.<br/>
+    <span class="app-link">🧺 결과물: 냉장고 파먹기 앱 (레시피 100+개 · 다크테마 · 자동 레시피 생성)</span>
+  </footer>
+
+</div>
+</body>
+</html>
