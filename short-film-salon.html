@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단편영화 살롱</title>
+<meta name="description" content="디퍼살롱 개별 살롱 · 4주를 함께, 내 AI 영화 한 편. AI 영상 도구가 처음이어도 괜찮습니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* 포스터 v2 · 안내문 v5와 같은 색 */
+  :root{
+    --base:#0B1018;      /* 짙은 남색 바탕 */
+    --base-hi:#141B26;
+    --card:#111823;
+    --line:rgba(243,233,210,.16);
+    --cream:#F3E9D2;
+    --mute:#B9C0C8;
+    --amber:#E8A33D;
+    --amber-soft:rgba(232,163,61,.14);
+    --serif:"Gowun Batang",serif;
+    --sans:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--base);color:var(--cream);font-family:var(--sans);
+       font-size:17px;line-height:1.75;word-break:keep-all;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+  section{padding:72px 0;border-top:1px solid var(--line)}
+  .eyebrow{font-size:14px;letter-spacing:.18em;color:var(--amber);margin-bottom:14px}
+  h2{font-family:var(--serif);font-weight:700;font-size:clamp(26px,5vw,34px);line-height:1.4;margin-bottom:22px}
+  p+p{margin-top:14px}
+  .mute{color:var(--mute)}
+  .anne-mini{display:inline-block;position:relative;height:1.95em;aspect-ratio:260/526;vertical-align:-0.45em;margin-left:4px}
+  .anne-mini img{position:absolute;inset:0;width:100%;height:100%}
+  .anne-mini .hand{transform-origin:14.6% 29%;animation:anneWave 1.4s ease-in-out infinite}
+  @keyframes anneWave{0%,100%{transform:rotate(-28deg)}50%{transform:rotate(24deg)}}
+  .anne h2{margin-bottom:14px}
+  .anne-list{list-style:none;margin-top:16px;display:grid;gap:10px}
+  .anne-list li{padding-left:18px;position:relative;color:var(--mute);font-size:16px}
+  .anne-list li::before{content:"";position:absolute;left:0;top:.75em;width:7px;height:7px;border-radius:50%;background:var(--amber)}
+  .anne-list b{color:var(--cream)}
+  .anne-note{margin-top:16px;font-size:15px}
+  .showreel{margin-top:26px}
+  .showreel video{display:block;width:100%;aspect-ratio:16/9;background:#000;border:1px solid var(--line);border-radius:12px}
+  .showreel figcaption{margin-top:8px;font-size:14px;color:var(--mute)}
+  .showreel .cc{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;color:var(--mute)}
+  .showreel .cc button{font:inherit;color:var(--cream);background:transparent;border:1px solid var(--line);border-radius:999px;padding:4px 14px;cursor:pointer}
+  .showreel .cc button[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
+  .showreel .cc button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  .showreel video::cue{font-family:var(--sans),"Malgun Gothic","Khmer OS Battambang","Khmer UI",sans-serif;font-size:1.05em;background:rgba(0,0,0,.6)}
+
+  /* 4주 진행: 슬레이트 다섯 장이 나란히. 누르면 막대가 '딱' 닫히고 그 주의 안내가 펼쳐진다 */
+  .slaterow{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(6px,2vw,14px);padding-top:clamp(18px,4vw,30px)}
+  .slate{position:relative;display:block;width:100%;padding-top:clamp(9px,1.8vw,14px);background:none;border:0;color:inherit;font:inherit;cursor:pointer;text-align:left}
+  .slate .stick{position:absolute;top:0;left:0;right:0;height:clamp(9px,1.8vw,14px);border-radius:3px 3px 0 0;
+    background:repeating-linear-gradient(-55deg,var(--cream) 0 7px,#0A0E15 7px 14px);border:1px solid rgba(243,233,210,.5);
+    transform-origin:3px 100%;transform:rotate(-16deg);transition:transform .15s cubic-bezier(.7,0,1,.6)}
+  .slate .board{display:block;background:#0D1219;border:1px solid var(--line);border-radius:0 0 8px 8px;overflow:hidden;
+    padding:0 0 clamp(8px,1.6vw,12px);transition:border-color .2s,background .2s}
+  .slate .board::before{content:"";display:block;height:clamp(6px,1.2vw,9px);margin-bottom:clamp(6px,1.4vw,10px);
+    background:repeating-linear-gradient(-55deg,var(--cream) 0 7px,#0A0E15 7px 14px);opacity:.85}
+  .slate .sc{display:block;padding:0 clamp(6px,1.4vw,12px);font-size:clamp(8px,1.6vw,11px);letter-spacing:.14em;color:var(--mute)}
+  .slate b{display:block;padding:0 clamp(6px,1.4vw,12px);font-family:var(--serif);font-size:clamp(20px,4.6vw,30px);line-height:1.15;color:var(--cream)}
+  .slate .tk{display:block;padding:0 clamp(6px,1.4vw,12px);font-size:clamp(12px,2.4vw,15px);color:var(--mute)}
+  .slate:hover .board,.slate:focus-visible .board{border-color:rgba(232,163,61,.6)}
+  .slate:focus-visible{outline:2px solid var(--amber);outline-offset:4px;border-radius:8px}
+  .slate.on .stick{transform:rotate(0)}
+  .slate.on .board{background:#18202C;border-color:var(--amber);animation:slateJolt .18s ease-out .12s}
+  .slate.on .tk{color:var(--amber)}
+  @keyframes slateJolt{40%{transform:translateY(2px)}}
+  .slatepanels{margin-top:18px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .panel+.panel{margin-top:12px}
+  .js .panel{display:none;margin-top:0}
+  .js .panel.show{display:block;animation:panelIn .35s ease-out}
+  @keyframes panelIn{from{opacity:0;transform:translateY(-6px)}}
+  .panel .when{font-size:14px;color:var(--amber);margin-bottom:4px}
+  .panel h3{font-family:var(--serif);font-size:20px;margin-bottom:6px}
+  .panel p{font-size:15.5px;color:var(--mute)}
+  strong{color:#fff;font-weight:700}
+
+  /* 첫 화면: 불 꺼진 상영관, 돌아가는 영사기와 빛 속 먼지 (안내문 v5에서) */
+  .hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;
+        background:radial-gradient(120% 80% at 50% 0%,#0E1015 0%,#060709 55%,#030405 100%)}
+  .hero::after{content:"";position:absolute;inset:auto 0 0 0;height:22%;z-index:1;pointer-events:none;
+        background:linear-gradient(180deg,rgba(6,7,9,0) 0%,var(--base) 100%)}
+  #dust{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .projector{position:absolute;z-index:1;left:clamp(10px,4vw,56px);top:clamp(14px,3vh,34px);width:clamp(84px,11vw,132px);
+        transform-origin:30% 70%;transform:rotate(var(--tilt,28deg));pointer-events:none}
+  .projector svg{display:block;width:100%;height:auto;overflow:visible}
+  .projector .reel{transform-box:fill-box;transform-origin:center;animation:spin 2.8s linear infinite}
+  .projector .reel.back{animation-duration:3.6s}
+  .projector .tip{position:absolute;right:-2%;top:61%;width:1px;height:1px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .sound{position:absolute;z-index:3;right:clamp(12px,3vw,32px);top:clamp(14px,3vh,30px);display:flex;align-items:center;gap:8px;
+        font:inherit;font-size:13px;color:var(--mute);background:rgba(4,5,6,.55);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer}
+  .sound:hover{color:var(--cream)}
+  .sound b{font-weight:400;color:inherit}
+  .sound .eq{display:flex;gap:2px;align-items:flex-end;height:12px}
+  .sound .eq i{width:2px;height:4px;background:var(--amber);border-radius:1px}
+  .sound[aria-pressed="true"]{color:var(--cream);border-color:rgba(232,163,61,.6)}
+  .sound[aria-pressed="true"] .eq i{animation:eq .5s ease-in-out infinite alternate}
+  .sound[aria-pressed="true"] .eq i:nth-child(2){animation-delay:.15s}.sound[aria-pressed="true"] .eq i:nth-child(3){animation-delay:.3s}
+  @keyframes eq{to{height:12px}}
+  /* 필름 카운트다운 3·2·1 → SCENE 01 */
+  .cue{position:absolute;left:50%;bottom:22px;z-index:2;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;
+        color:var(--mute);text-decoration:none}
+  .leader{position:relative;width:58px;height:58px;border-radius:50%;border:1px solid rgba(243,233,210,.45);overflow:hidden;background:rgba(4,5,6,.5)}
+  .leader::before,.leader::after{content:"";position:absolute;background:rgba(243,233,210,.25)}
+  .leader::before{left:50%;top:0;bottom:0;width:1px}.leader::after{top:50%;left:0;right:0;height:1px}
+  .leader .sweep{position:absolute;inset:0;border-radius:50%;
+        background:conic-gradient(rgba(243,233,210,.26) calc(var(--p,0) * 1turn),transparent 0)}
+  .leader .ring{position:absolute;inset:7px;border-radius:50%;border:1px solid rgba(243,233,210,.3)}
+  .leader .num{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:26px;
+        font-weight:700;color:var(--cream);text-shadow:0 0 12px rgba(0,0,0,.8)}
+  .cue .lbl{font-size:11px;letter-spacing:.32em;text-indent:.32em;opacity:.35;transition:opacity .6s ease,color .6s ease}
+  .cue.done .lbl{opacity:1;color:var(--amber)}
+  .cue.done .leader{border-color:rgba(232,163,61,.55)}
+  .cue.done .leader .num{font-family:var(--sans);font-size:15px;color:var(--amber);animation:bob 2.2s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(3px)}}
+
+  .hero .wrap{position:relative;z-index:2;width:100%;padding-top:34vh;padding-bottom:130px;text-shadow:0 2px 20px rgba(0,0,0,.7)}
+  .kicker{font-family:var(--serif);color:var(--mute);font-size:16px;letter-spacing:.3em}
+  .salon-name{font-family:var(--serif);font-weight:700;font-size:24px;margin:4px 0 18px;color:var(--cream)}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(40px,9vw,64px);line-height:1.25;letter-spacing:-.01em}
+  .lead{margin-top:16px;font-size:19px;color:var(--mute)}
+
+  .facts{display:grid;grid-template-columns:1fr 1fr;margin-top:30px;border-top:1px solid var(--line)}
+  .facts div{padding:14px 0;border-bottom:1px solid var(--line);font-size:16px}
+  .facts div:nth-child(odd){padding-right:14px;border-right:1px solid var(--line)}
+  .facts div:nth-child(even){padding-left:18px}
+  .facts b{color:#fff}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;
+       min-height:56px;padding:0 30px;border-radius:999px;font-size:18px;font-weight:700;
+       text-decoration:none;cursor:pointer;border:0;transition:transform .15s,box-shadow .15s}
+  .btn-amber{background:var(--amber);color:#1A1208;box-shadow:0 6px 28px rgba(232,163,61,.35)}
+  .btn-amber:hover{transform:translateY(-2px);box-shadow:0 10px 34px rgba(232,163,61,.45)}
+  .btn-line{background:transparent;color:var(--cream);border:1.5px solid var(--cream)}
+  .btn-line:hover{background:rgba(243,233,210,.08)}
+  .hero .btn{margin-top:28px}
+
+  /* 이런 분들 */
+  .who{list-style:none;display:grid;gap:12px}
+  .who li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px 18px 54px;position:relative}
+  .who li::before{content:"";position:absolute;left:22px;top:28px;width:14px;height:10px;border-radius:2px;
+        background:var(--amber);box-shadow:0 0 12px rgba(232,163,61,.6)}
+  .note{margin-top:18px;padding:14px 18px;border-left:3px solid var(--amber);background:var(--amber-soft);border-radius:0 10px 10px 0}
+
+  /* 필름 띠 4주 */
+        font-family:var(--serif);color:var(--amber);font-size:15px;line-height:1.4}
+        background:repeating-linear-gradient(180deg,transparent 0 6px,rgba(243,233,210,.22) 6px 12px)}
+
+  .keep{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .keep div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .keep .big{font-family:var(--serif);font-size:22px;font-weight:700;display:block;margin-bottom:6px;color:#fff}
+
+  /* 참가비 */
+  .price{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .tier{border-radius:18px;padding:28px 24px;display:flex;flex-direction:column;border:1px solid var(--line);background:var(--card)}
+  .tier.member{border:1.5px solid var(--amber);background:linear-gradient(180deg,rgba(232,163,61,.12),var(--card) 60%)}
+  .tier .tag{display:inline-block;align-self:flex-start;font-size:13px;font-weight:700;padding:4px 12px;border-radius:999px;
+        background:var(--amber);color:#1A1208;margin-bottom:14px}
+  .tier.general .tag{background:transparent;color:var(--cream);border:1px solid var(--line)}
+  .tier h3{font-size:18px;font-weight:700}
+  .tier .who-for{font-size:14.5px;color:var(--mute);margin-top:2px}
+  .tier .amount{font-family:var(--serif);font-size:40px;font-weight:700;margin:18px 0 4px;color:#fff;line-height:1.2}
+  .tier .amount small{font-size:20px}
+  .tier .per{font-size:14px;color:var(--mute);margin-bottom:22px}
+  .tier .btn{margin-top:auto;width:100%}
+  .price.one{grid-template-columns:minmax(0,420px)}
+  .same{margin-top:16px;font-size:15px;color:var(--mute);text-align:center}
+
+  dl.info{display:grid;grid-template-columns:120px 1fr;border-top:1px solid var(--line)}
+  dl.info dt,dl.info dd{padding:14px 0;border-bottom:1px solid var(--line)}
+  dl.info dt{color:var(--amber);font-size:15px}
+  dl.info dd{font-size:16px}
+
+  ol.rules{list-style:none;counter-reset:r;display:grid;gap:10px}
+  ol.rules li{counter-increment:r;padding-left:38px;position:relative}
+  ol.rules li::before{content:counter(r);position:absolute;left:0;top:2px;width:26px;height:26px;border-radius:50%;
+        border:1px solid var(--amber);color:var(--amber);font-size:14px;display:grid;place-items:center}
+
+  details{border-bottom:1px solid var(--line)}
+  details:first-of-type{border-top:1px solid var(--line)}
+  summary{list-style:none;cursor:pointer;padding:18px 34px 18px 0;font-weight:700;position:relative}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";position:absolute;right:4px;top:12px;font-size:26px;color:var(--amber);font-weight:400}
+  details[open] summary::after{content:"−"}
+  details p{padding:0 0 18px;color:var(--mute)}
+
+  .host{display:flex;gap:20px;align-items:flex-start}
+  .host .mark{flex:none;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FFD9A0,var(--amber) 60%,#8A5A1C);
+        box-shadow:0 0 30px rgba(232,163,61,.4)}
+  .host h3{font-family:var(--serif);font-size:22px;margin-bottom:6px}
+
+  .final{text-align:center;padding:96px 0 120px;
+         background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(232,163,61,.18),transparent 70%)}
+  .final h2{margin-bottom:12px}
+  .ticket{max-width:420px;margin:30px auto 0;padding:28px 24px;border:1.5px solid var(--amber);border-radius:18px;
+    background:linear-gradient(180deg,rgba(232,163,61,.12),var(--card) 60%)}
+  .ticket .t-name{font-size:17px;font-weight:700}
+  .ticket .amount{font-family:var(--serif);font-size:40px;font-weight:700;margin:10px 0 2px;color:#fff;line-height:1.2}
+  .ticket .amount small{font-size:20px}
+  .ticket .per{font-size:14px;color:var(--mute)}
+  .ticket .btn{width:100%;margin:20px 0 10px}
+  .final .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+
+  /* 휴대폰 아래 고정 버튼 */
+  .sticky{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+          background:linear-gradient(180deg,transparent,rgba(11,16,24,.96) 30%);display:none;z-index:10;
+          transition:opacity .2s}
+  .sticky .btn{width:100%}
+  .sticky.hide{opacity:0;pointer-events:none}
+  footer{padding:32px 0 100px;font-size:13px;color:var(--mute);text-align:center;border-top:1px solid var(--line)}
+
+  @media (max-width:640px){
+    body{font-size:16px}
+    section{padding:56px 0}
+    .wrap{padding:0 16px}
+    .price,.keep{grid-template-columns:1fr}
+    .facts div:nth-child(even){padding-left:12px}
+    .facts div:nth-child(odd){padding-right:10px}
+    .facts div{font-size:15px}
+    dl.info{grid-template-columns:92px 1fr}
+    .host{flex-direction:column}
+    .sticky{display:block}
+    .hero .wrap{padding-top:30vh;padding-bottom:120px}
+    .sound{font-size:12px;padding:6px 12px}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}.projector .reel,.cue.done .leader .num{animation:none}.slate .stick{transition:none}.anne-mini .hand{animation:none}.slate.on .board,.js .panel.show{animation:none}}
+</style>
+</head>
+<body>
+
+<!-- 1. 첫 화면 -->
+<header class="hero">
+  <canvas id="dust" aria-hidden="true"></canvas>
+  <div class="projector" id="projector" aria-hidden="true">
+    <svg viewBox="0 0 140 110" fill="none" stroke="rgba(243,233,210,.62)" stroke-width="2">
+      <g class="reel back"><circle cx="40" cy="30" r="24" fill="#08090b"/><circle cx="40" cy="30" r="5" fill="rgba(243,233,210,.5)" stroke="none"/>
+        <path d="M40 9v14M40 37v14M19 30h14M47 30h14M25 15l10 10M45 35l10 10M55 15L45 25M35 35L25 45" stroke-width="1.6"/></g>
+      <g class="reel"><circle cx="88" cy="34" r="20" fill="#08090b"/><circle cx="88" cy="34" r="4.5" fill="rgba(243,233,210,.5)" stroke="none"/>
+        <path d="M88 17v11M88 40v11M71 34h11M94 34h11M76 22l8 8M92 38l8 8M100 22l-8 8M84 38l-8 8" stroke-width="1.6"/></g>
+      <rect x="14" y="56" width="98" height="38" rx="7" fill="#0c0d10"/>
+      <path d="M40 54l8 4M88 54l-6 4" stroke-width="1.4"/>
+      <rect x="112" y="62" width="20" height="18" rx="3" fill="#0c0d10"/>
+      <ellipse cx="133" cy="71" rx="3" ry="8" fill="rgba(243,233,210,.9)" stroke="none"/>
+      <circle cx="30" cy="75" r="4" stroke-width="1.4"/><path d="M44 70h44M44 80h30" stroke-width="1.4" opacity=".6"/>
+      <path d="M30 94l-6 12M96 94l6 12" stroke-width="2"/>
+    </svg>
+    <i class="tip" id="lensTip"></i>
+  </div>
+  <button type="button" class="sound" id="sound" aria-pressed="false"><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><b>영사기 소리 켜기</b></button>
+  <div class="wrap">
+    <div class="kicker">디퍼살롱 개별 살롱</div>
+    <div class="salon-name">단편영화 살롱</div>
+    <h1>4주를 함께,<br>내 AI 영화 한 편.</h1>
+    <p class="lead">AI 영상 도구가 처음이어도 괜찮습니다.</p>
+    <div class="facts">
+      <div><b>11월 5일</b> 개강 · 0주차 + 4주</div>
+      <div>매주 <b>목</b> 저녁 8~10시</div>
+      <div><b>온라인</b>(줌) · 6명</div>
+      <div>참가비 <b>25만 원</b></div>
+    </div>
+  </div>
+  <a class="cue" href="#intro" id="cue" aria-label="소개로 내려가기">
+    <span class="leader" aria-hidden="true"><span class="sweep"></span><span class="ring"></span><span class="num">3</span></span>
+    <span class="lbl">SCENE 01</span>
+  </a>
+</header>
+
+<main>
+
+<!-- 2. 어떤 살롱 -->
+<section id="intro">
+  <div class="wrap">
+    <div class="eyebrow">어떤 살롱인가요</div>
+    <h2>말로는 다 전하기 어려운 이야기를<br>80초짜리 영화 한 편으로.</h2>
+    <p>마음에 오래 둔 장면 하나를 골라, 4주 동안 함께 한 편의 영화로 끝까지 만듭니다.</p>
+    <p>설계는 <strong>🍎 앤</strong>이 짓습니다. 남길 한 문장을 들려주면 대본·그림 프롬프트·만드는 법을 지어 주는, 살롱의 클로드 친구입니다.</p>
+    <p><strong>무엇을 남길지, 어떤 목소리로 말할지는 만드는 사람이 정합니다.</strong> 모임 시간은 고르고, 확인하고, 내 목소리를 입히는 데 씁니다.</p>
+  </div>
+</section>
+
+<!-- 2-1. 앤 소개 -->
+<section id="anne">
+  <div class="wrap">
+    <div class="eyebrow">함께 걷는 친구</div>
+    <div class="anne">
+      <div>
+        <h2>앤을 소개합니다. <span class="anne-mini" role="img" aria-label="손을 흔드는 빨강 머리 앤"><img src="short-film-salon-media/anne-body.png" alt=""><img class="hand" src="short-film-salon-media/anne-hand.png" alt=""></span></h2>
+        <p>『빨강 머리 앤』의 앤에게서 이름을 빌렸습니다. 머릿속 장면을 붙잡아 말로 그려 내던 아이처럼, 내 안의 한 문장을 손으로 따라 만들 장면으로 옮겨 줍니다.</p>
+        <ul class="anne-list">
+          <li><b>먼저 묻습니다.</b> 어떤 영상인지, 남길 한 문장은 무엇인지, 누가 볼지. 이미 말한 것은 다시 묻지 않고, 빠진 것만 하나씩.</li>
+          <li><b>세 장을 지어 줍니다.</b> 대본(컷표) · 그림 프롬프트 · 만드는 법. 복사해 붙이면 바로 쓸 수 있게.</li>
+          <li><b>막히면 곁에 있습니다.</b> 그림이 이상하게 나올 때 고칠 문장을 찾아 줍니다. 세 편을 만들며 쌓은 기록이 앤 안에 있습니다.</li>
+          <li><b>손은 내 것으로 남깁니다.</b> 생성 버튼, 결제, 게시는 언제나 만드는 사람이 누릅니다.</li>
+        </ul>
+        <p class="mute anne-note">대화 속 앤은 늘 🍎로 말을 시작합니다. 앤을 깨우는 열쇠말은 오리엔테이션에서 나눕니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. 이런 분들 -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">이런 분들을 모십니다</div>
+    <h2>내 이야기가 있는 분이면 됩니다.</h2>
+    <ul class="who">
+      <li>시청각 교육자료를 만들고 싶은 <strong>교사·강사</strong></li>
+      <li>마음속 이야기를 <strong>영화로 남기고 싶은 분</strong></li>
+      <li>함께 하는 이야기가 있는 <strong>모임·단체</strong></li>
+      <li>제품이나 일하는 모습을 영상으로 소개하고 싶은 <strong>공방·1인 브랜드</strong></li>
+    </ul>
+    <p class="note">AI 영상 도구도, 클로드도 한 번도 써 보지 않았어도 됩니다. 계정 만들기와 앤 데려오기부터 0주차에 함께 합니다.</p>
+  </div>
+</section>
+
+<!-- 4. 4주 진행 -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">4주 진행</div>
+    <h2>한 주에 한 걸음씩.</h2>
+    <div class="slaterow" role="tablist" aria-label="4주 진행">
+      <button class="slate" type="button" role="tab" id="sl0" aria-controls="wk0" aria-selected="false">
+        <span class="stick" aria-hidden="true"></span>
+        <span class="board"><span class="sc">SCENE</span><b>00</b><span class="tk">준비</span></span>
+      </button>
+      <button class="slate" type="button" role="tab" id="sl1" aria-controls="wk1" aria-selected="false">
+        <span class="stick" aria-hidden="true"></span>
+        <span class="board"><span class="sc">SCENE</span><b>01</b><span class="tk">1주</span></span>
+      </button>
+      <button class="slate" type="button" role="tab" id="sl2" aria-controls="wk2" aria-selected="false">
+        <span class="stick" aria-hidden="true"></span>
+        <span class="board"><span class="sc">SCENE</span><b>02</b><span class="tk">2주</span></span>
+      </button>
+      <button class="slate" type="button" role="tab" id="sl3" aria-controls="wk3" aria-selected="false">
+        <span class="stick" aria-hidden="true"></span>
+        <span class="board"><span class="sc">SCENE</span><b>03</b><span class="tk">3주</span></span>
+      </button>
+      <button class="slate" type="button" role="tab" id="sl4" aria-controls="wk4" aria-selected="false">
+        <span class="stick" aria-hidden="true"></span>
+        <span class="board"><span class="sc">SCENE</span><b>04</b><span class="tk">4주</span></span>
+      </button>
+    </div>
+    <div class="slatepanels">
+      <div class="panel" role="tabpanel" id="wk0" aria-labelledby="sl0">
+        <div class="when">11/3(화) 저녁 9~10시 · 오리엔테이션</div>
+        <h3>앤 데려오기, 도구 한 바퀴</h3>
+        <p>다 같이 내 클로드에 <b>앤</b>을 데려오고, 앤을 깨우는 열쇠말을 나눕니다. 그다음 4주 동안 쓸 도구를 진짜 주소로 하나씩 들어가 봅니다 — 그림을 그리는 <b>나노바나나</b>(제미나이), 그림을 움직이는 영상 도구 <b>Hailuo·Kling</b>. 도구마다 무료로 어디까지 되는지도 함께 봅니다.</p>
+      </div>
+      <div class="panel" role="tabpanel" id="wk1" aria-labelledby="sl1">
+        <div class="when">11/5(목)</div>
+        <h3>한 문장에서 설계 세 장으로</h3>
+        <p>영화로 만들 이야기 하나에서 남길 한 문장을 붙잡고, 그 문장으로 다 같이 앤을 따라갑니다. 앤의 질문에 답하면 <b>대본·그림 프롬프트·만드는 법</b> 세 장이 나옵니다. 그다음 대본을 한 사람씩 함께 읽으며, 이것만은 꼭 전해져야 하는 장면 ‘심장 컷’을 함께 찾습니다.</p>
+      </div>
+      <div class="panel" role="tabpanel" id="wk2" aria-labelledby="sl2">
+        <div class="when">11/12(목)</div>
+        <h3>기준 그림과 심장 컷 먼저</h3>
+        <p>앤이 지은 프롬프트로 인물·소품·장소 기준 그림 세 장을 만들고, 심장 컷부터 뽑습니다. 서로의 그림을 보고 “이 사람이 방금 무엇을 했나요?” 한 마디로 확인합니다. 막히면 앤에게 그 자리에서 물어봅니다.</p>
+      </div>
+      <div class="panel" role="tabpanel" id="wk3" aria-labelledby="sl3">
+        <div class="when">11/19(목)</div>
+        <h3>그림을 움직이고, 한 편으로 묶기</h3>
+        <p>그림을 영상 도구로 움직이는 법을 함께 배웁니다. 앤의 「만드는 법」에 적힌 움직임 문장을 그대로 씁니다. 이어서 움직인 클립을 CapCut으로 옮겨 한 편으로 이어 붙이는 법을 배웁니다.</p>
+      </div>
+      <div class="panel" role="tabpanel" id="wk4" aria-labelledby="sl4">
+        <div class="when">11/26(목)</div>
+        <h3>함께 상영</h3>
+        <p>불을 끄고, 서로의 영화를 한 편씩 함께 봅니다. 영화마다 남길 한 문장이 어떻게 전해졌는지 나누고, 다음 편에 물려줄 것을 챙깁니다.</p>
+      </div>
+    </div>
+    <p class="mute" style="margin-top:14px;font-size:15px">모임 시간은 모두 한국 시간입니다(캄보디아 18~20시). 한 주에 모임 2시간과 혼자 작업하는 시간이 듭니다.</p>
+  </div>
+</section>
+
+<!-- 5. 남는 것 -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">끝나면 남는 것</div>
+    <h2>한 편을 만들면,<br>다음 편은 앤과 만듭니다.</h2>
+    <div class="keep">
+      <div><span class="big">내 영화 한 편</span><span class="mute">80초 안팎 완성본(mp4)</span></div>
+      <div><span class="big">다음 편 준비물</span><span class="mute">인물·장소 기준 그림, 그림체 정의, 내가 겪은 「안 될 때」 기록을 모은 한 장</span></div>
+      <div style="grid-column:1 / -1"><span class="big">🍎 앤</span><span class="mute">내 클로드에 남는 영상 설계 친구. 살롱이 끝나도 남길 한 문장만 들려주면 다음 편의 대본·그림 프롬프트·만드는 법을 함께 지어 줍니다</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. 한눈에 -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">한눈에 보기</div>
+    <h2>준비하실 것</h2>
+    <dl class="info">
+      <dt>기간</dt><dd>2026년 11월 5일(목) ~ 11월 26일(목), 4주<br><span class="mute">개강 전 오리엔테이션 11월 3일(화) 저녁 9~10시</span></dd>
+      <dt>모임</dt><dd>매주 목요일 저녁 8~10시 · 줌</dd>
+      <dt>신청 마감</dt><dd>11월 1일(일) · 정원이 먼저 차면 그때 마감합니다</dd>
+      <dt>정원</dt><dd>6명<br><span class="mute">11월 1일(일)까지 신청이 3명 이하면 수업을 열지 않고 참가비는 모두 환불해 드립니다.</span></dd>
+      <dt>준비물</dt><dd>구글 계정, <b>Claude 계정</b>(앤이 살 곳), 노트북(만들기용), 휴대폰(얼굴·목소리, 녹음용)</dd>
+      <dt>줌 참여</dt><dd>휴대폰과 노트북 두 기기로 들어옵니다. <b>휴대폰으로는 함께 걷는 사람의 화면을 보고, 노트북으로는 그 자리에서 따라 만듭니다.</b> 한 화면에서 보며 따라 하기는 생각보다 어렵습니다. 노트북은 소리를 끄고, 막혔을 때 내 화면을 보여 주는 데도 씁니다. 두 기기로 들어오는 법은 오리엔테이션 전에 한 장으로 안내드립니다.</dd>
+      <dt>문의</dt><dd><a href="https://open.kakao.com/o/g16c2uTi" target="_blank" rel="noopener"><b>카카오톡 문의 오픈채팅방</b></a>에서 신청 전 궁금한 점을 물어보세요.</dd>
+      <dt>참가비 결제</dt><dd>현지 사정으로 계좌 이체로만 받습니다. 카드 결제와 소득공제는 어렵습니다.</dd>
+      <dt>녹화</dt><dd>모임은 녹화해 참가자 대화방에서만 나눕니다. 다시 보며 따라 하실 수 있습니다.</dd>
+      <dt>도구 비용</dt><dd><b>모든 도구를 무료로 씁니다.</b> 유료는 더 큰 그림이나 더 많은 영상이 필요할 때만 선택하시면 됩니다.</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- 8. 규칙 -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">함께 지키는 것</div>
+    <h2>다섯 가지 약속</h2>
+    <ol class="rules">
+      <li>남의 음원은 쓰지 않습니다.</li>
+      <li>실존 인물·유명 캐릭터를 닮은 결과물은 내보내지 않습니다.</li>
+      <li>도구는 확인한 주소로만 들어갑니다.</li>
+      <li>실제 사람의 이야기는 어디까지 보여 줄지 먼저 정합니다.</li>
+      <li>화면 안 글자는 AI에게 맡기지 않고 편집에서 넣습니다.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- 9. 운영자 -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">함께 걷는 사람</div>
+    <div class="host">
+      <div class="mark" aria-hidden="true"></div>
+      <div>
+        <h3>스윗워러</h3>
+        <p>캄보디아에서 글을 쓰고 한국어를 가르칩니다. 기숙사 리더교육에서 말로 잘 전해지지 않는 장면을 AI 영상 수업 자료로 만들어 왔습니다.</p>
+        <p>2026년 8월, 82초짜리 「네가 정해」를 하루 만에 끝까지 만들었습니다. 그 뒤로 두 편을 더 끝까지 만들며 걸은 순서와, 막히고 풀었던 기록을 <b>앤</b>에게 담았습니다. 이 살롱에서는 그 길을 앤과 함께 걷습니다.</p>
+      </div>
+    </div>
+    <figure class="showreel">
+      <video controls playsinline preload="metadata" poster="short-film-salon-media/nega-jeonghae-cover.jpg">
+        <source src="short-film-salon-media/nega-jeonghae.mp4" type="video/mp4">
+      </video>
+      <figcaption>「네가 정해」 · 82초 · 기숙사 리더교육 수업 자료</figcaption>
+      <div class="cc" role="group" aria-label="자막">
+        <span>자막</span>
+        <button type="button" data-cc="ko" aria-pressed="true">한국어</button>
+        <button type="button" data-cc="en" aria-pressed="false">English</button>
+        <button type="button" data-cc="km" aria-pressed="false" lang="km">ខ្មែរ</button>
+        <button type="button" data-cc="off" aria-pressed="false">끄기</button>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<!-- 10. 자주 묻는 것 -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">자주 묻는 것</div>
+    <h2>궁금하실 것 같아서</h2>
+    <details><summary>AI 영상 도구를 하나도 몰라요.</summary><p>괜찮습니다. 0주차에 계정 만들기와 로그인부터 같이 합니다. 프롬프트는 앤이 지어 주니 외우지 않아도 됩니다. 복사해 붙이고, 나온 그림을 보고 고르는 것부터 함께 합니다.</p></details>
+    <details><summary>클로드를 써 본 적이 없어요.</summary><p>괜찮습니다. 클로드 계정을 만들고 앤을 데려오는 일은 0주차 오리엔테이션에서 한 단계씩 같이 합니다. 그다음부터는 앤에게 말을 걸기만 하면 됩니다.</p></details>
+    <details><summary>앤이 다 만들어 주면 제가 할 일은 뭔가요?</summary><p>앤은 설계도를 그립니다. 무엇을 남길지 정하고, 그림을 뽑아 고르고, 목소리를 입히고, 한 편으로 묶는 것은 만드는 사람의 손입니다. 생성 버튼과 결제와 게시도 늘 내가 누릅니다.</p></details>
+    <details><summary>참가비 말고 돈이 더 드나요?</summary><p>무료로 시작합니다. 그림은 무료 계정으로도 영화 한 편을 충분히 만들 수 있고, 앤도 무료 클로드 계정에 데려올 수 있습니다. 무료는 쓸 수 있는 양에 한도가 있지만 몇 시간 뒤면 다시 채워집니다. 큰 그림이 필요하거나, 영상을 더 많이·워터마크 없이 만들고 싶을 때만 한 달 결제를 선택하시면 됩니다.</p></details>
+    <details><summary>모임에 빠지면 어떻게 하나요?</summary><p>모임은 모두 녹화해 참가자께 나눕니다. 빠진 날은 녹화본을 보며 그 주 단계를 따라 하시면 됩니다. 앤은 언제든 그 자리에서 이어 걸어 주고, 혼자 하다 막힌 곳은 다음 모임에서 함께 봅니다.</p></details>
+    <details><summary>신청한 사람이 적으면 어떻게 되나요?</summary><p>오리엔테이션 이틀 전인 11월 1일(일)까지 신청이 3명 이하면 수업을 열지 않습니다. 그때는 받은 참가비를 모두 환불해 드립니다.</p></details>
+    <details><summary>디퍼 OS를 쓰지 않아도 되나요?</summary><p>네, 없어도 참여할 수 있습니다. 디퍼 OS에 모아 둔 씨앗 문장이 있다면 영화의 출발점으로 쓰기 좋습니다.</p></details>
+    <details><summary>완성한 영화를 어디에 올리나요?</summary><p>영화는 만든 분의 것입니다. 살롱 홍보에는 동의해 주신 분의 작품만 씁니다. 살롱 안에서는 닉네임으로 부릅니다.</p></details>
+    <p class="mute" style="margin-top:18px">더 궁금한 점은 <a href="https://open.kakao.com/o/g16c2uTi" target="_blank" rel="noopener"><b>문의 오픈채팅방</b></a>에서 물어보세요.</p>
+  </div>
+</section>
+
+<!-- 11. 마지막 · 참가비와 신청 -->
+<section class="final" id="price">
+  <div class="wrap">
+    <h2>당신의 이야기를<br>한 편의 영화로.</h2>
+    <p class="mute">11월 5일 목요일 저녁, 불 꺼진 상영관에서 만나요.</p>
+    <div class="ticket">
+      <div class="t-name">단편영화 살롱 1기</div>
+      <div class="amount">250,000<small>원</small></div>
+      <div class="per">4주 전체 · 0주차 오리엔테이션 포함 · 모임 녹화본 포함<br>계좌 이체로만 받습니다 (카드 결제·소득공제 어려움)</div>
+      <a class="btn btn-amber apply" data-tier="general" href="#">신청하기</a>
+      <div class="per">정원 6명 · 신청 마감 11월 1일(일), 그 전에 차면 마감합니다<br>3명 이하면 수업을 열지 않고 참가비는 환불해 드립니다</div>
+      <div class="per" style="margin-top:12px"><a href="https://open.kakao.com/o/g16c2uTi" target="_blank" rel="noopener"><b>신청 전 궁금한 점 · 문의 오픈채팅방 열기</b></a></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>디퍼살롱 개별 살롱 · 단편영화 살롱 1기 · 운영 스윗워러</footer>
+
+<div class="sticky" id="sticky"><a class="btn btn-amber" href="#price">신청하기</a></div>
+
+<script>
+  // ▼ 신청 링크 두 개만 여기에 넣으면 페이지의 모든 신청 버튼이 이어집니다.
+  //   같은 신청서를 쓰려면 두 칸에 같은 주소를 넣으세요.
+  var APPLY_LINKS = {
+    general: "https://docs.google.com/forms/d/e/1FAIpQLSfx9opM3yeGvPh5t8P2SLhoek_ZX4P3ArnVImbIqp-5xxXV6g/viewform"    // 신청서 주소
+  };
+
+  document.querySelectorAll(".apply").forEach(function (a) {
+    var url = APPLY_LINKS[a.dataset.tier];
+    if (url) {
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noopener";
+    } else {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        alert("신청서를 준비하고 있습니다. 곧 열어 드릴게요.");
+      });
+    }
+  });
+
+  // 첫 화면이나 신청 칸이 보이는 동안은 아래 고정 버튼을 숨김
+  var sticky = document.getElementById("sticky");
+  var seen = new Map();
+  sticky.classList.add("hide");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { seen.set(e.target, e.isIntersecting); });
+      sticky.classList.toggle("hide", Array.from(seen.values()).some(Boolean));
+    }, { threshold: 0.15 });
+    io.observe(document.querySelector(".hero"));
+    io.observe(document.getElementById("price"));
+  }
+</script>
+<script>
+/* 첫 화면 · 영사기 빛과 먼지. 먼지 밀도는 빛의 세기에 비례한다 (안내문 v5와 같은 코드) */
+(() => {
+  const c = document.getElementById('dust'); if (!c) return;
+  const x = c.getContext('2d');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let w = 0, h = 0, dpr = 1, S, aim, half, L, run = true, raf = 0, fl = 0, flick = 1, base = [], beamP = [];
+  const dust = (p) => Object.assign(p, {
+    r: Math.random() < 0.88 ? 0.35 + Math.random() * 0.8 : 1.1 + Math.random() * 1.1,
+    vx: (Math.random() - 0.4) * 0.08, vy: (Math.random() - 0.62) * 0.06,
+    ph: Math.random() * 6.28, sp: 0.004 + Math.random() * 0.012, amber: Math.random() < 0.12
+  });
+  // 빛의 세기: 빛줄기 가운데일수록, 렌즈에 가까울수록 세다
+  function inten(px, py) {
+    let k = 1 - Math.abs(Math.atan2(py - S.y, px - S.x) - aim) / half;
+    if (k <= 0) return 0; k = k * k * (3 - 2 * k);
+    const f = Math.max(0, 1 - Math.hypot(px - S.x, py - S.y) / L);
+    return k * f * f;
+  }
+  // 빛줄기 안을 넓이 기준으로 고르게 뽑고, 세기만큼만 받아들인다 → 밀도 ∝ 세기
+  function sampleBeam() {
+    for (let i = 0; i < 400; i++) {
+      const a = aim + (Math.random() * 2 - 1) * half, r = L * Math.sqrt(Math.random());
+      const px = S.x + Math.cos(a) * r, py = S.y + Math.sin(a) * r;
+      if (px < 0 || py < 0 || px > w || py > h) continue;
+      if (Math.random() < inten(px, py)) return { x: px, y: py };
+    }
+    return { x: S.x + Math.cos(aim) * 40, y: S.y + Math.sin(aim) * 40 };
+  }
+  function setup() {
+    const r = c.getBoundingClientRect();
+    dpr = Math.min(devicePixelRatio || 1, 2); w = r.width; h = r.height;
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const pj = document.getElementById('projector'), tip = document.getElementById('lensTip');
+    const pr = pj.getBoundingClientRect();
+    const px = pr.left - r.left + pr.width * 0.5, py = pr.top - r.top + pr.height * 0.5;
+    aim = Math.min(Math.atan2(h * 0.95 - py, w * 0.92 - px), w < 600 ? 0.62 : 0.5);
+    pj.style.setProperty('--tilt', (aim * 180 / Math.PI).toFixed(1) + 'deg');
+    const tr = tip.getBoundingClientRect();
+    S = { x: tr.left - r.left + 2, y: tr.top - r.top };
+    half = w < 600 ? 0.2 : 0.15; L = Math.hypot(w, h) * 1.15;
+    base = Array.from({ length: Math.min(420, Math.round(w * h / 2600)) }, () => dust({ x: Math.random() * w, y: Math.random() * h }));
+    beamP = Array.from({ length: Math.min(1100, Math.round(w * h / 900)) }, () => dust(sampleBeam()));
+  }
+  function beam() {
+    const g = x.createRadialGradient(S.x, S.y, 0, S.x, S.y, L);
+    g.addColorStop(0, 'rgba(243,233,210,0.30)'); g.addColorStop(0.08, 'rgba(243,233,210,0.17)');
+    g.addColorStop(0.45, 'rgba(243,233,210,0.07)'); g.addColorStop(1, 'rgba(243,233,210,0)');
+    for (const [k, a] of [[1, 1], [0.55, 0.9]]) {
+      x.save(); x.globalAlpha *= a; x.fillStyle = g; x.beginPath(); x.moveTo(S.x, S.y);
+      x.lineTo(S.x + Math.cos(aim - half * k) * L * 1.3, S.y + Math.sin(aim - half * k) * L * 1.3);
+      x.lineTo(S.x + Math.cos(aim + half * k) * L * 1.3, S.y + Math.sin(aim + half * k) * L * 1.3);
+      x.closePath(); x.filter = 'blur(18px)'; x.fill(); x.restore();
+    }
+  }
+  function move(p) {
+    p.x += p.vx + Math.sin(p.ph) * 0.05; p.y += p.vy + Math.cos(p.ph * 0.7) * 0.04; p.ph += p.sp;
+  }
+  function draw(p, a, grow) {
+    x.fillStyle = p.amber ? 'rgba(232,163,61,' + (a * 0.95).toFixed(3) + ')' : 'rgba(243,233,210,' + a.toFixed(3) + ')';
+    x.beginPath(); x.arc(p.x, p.y, p.r * grow, 0, 6.283); x.fill();
+  }
+  function frame() {
+    x.clearRect(0, 0, w, h);
+    if (!still && ++fl % 3 === 0) flick = 0.88 + Math.random() * 0.12;
+    x.save(); x.globalAlpha = flick; beam(); x.restore();
+    for (const p of base) {
+      if (!still) { move(p); if (p.x < -4) p.x = w + 4; if (p.x > w + 4) p.x = -4; if (p.y < -4) p.y = h + 4; if (p.y > h + 4) p.y = -4; }
+      const i = inten(p.x, p.y), tw = 0.7 + 0.3 * Math.sin(p.ph * 2.3);
+      draw(p, (0.12 + i * 0.7) * tw, 1 + i * 0.5);
+    }
+    for (const p of beamP) {
+      if (!still) { move(p); }
+      let i = inten(p.x, p.y);
+      if (i < 0.015) { Object.assign(p, sampleBeam()); i = inten(p.x, p.y); }
+      const tw = 0.7 + 0.3 * Math.sin(p.ph * 2.3);
+      draw(p, Math.min(1, (0.1 + i * 1.1) * tw * flick), 1 + i * 0.6);
+    }
+    if (!still && run) raf = requestAnimationFrame(frame);
+  }
+  setup(); frame();
+  addEventListener('resize', () => { cancelAnimationFrame(raf); setup(); frame(); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => {
+    const was = run; run = en.isIntersecting; if (run && !was && !still) frame();
+  }).observe(c);
+})();
+
+/* 영사기 소리 · 누를 때만 켜진다(브라우저는 소리를 저절로 틀지 못하게 한다) */
+(() => {
+  const btn = document.getElementById('sound'); if (!btn) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) { btn.hidden = true; return; }
+  let ac, master, hum, tick = 0, next = 0, timer = 0, on = false, burst;
+  // 띡: 1kHz 짧은 음. 마지막 1은 조금 높게. 크기 0.25
+  window.leaderBeep = (i) => {
+    if (!on || !ac) return;
+    const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.value = i === 2 ? 1320 : 1000;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.25, t + 0.005);
+    g.gain.setValueAtTime(0.25, t + 0.11); g.gain.linearRampToValueAtTime(0, t + 0.14);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.16);
+  };
+  // 딱: 사람이 슬레이트를 누르면 영사기 소리가 꺼져 있어도 난다. 저절로 닫힐 때는 소리가 켜져 있을 때만
+  window.slateClap = (user) => {
+    if (!on && !user) return;
+    if (!ac) { if (!user) return; ac = new AC(); }
+    if (ac.state === 'suspended') ac.resume();
+    const t = ac.currentTime, n = Math.round(ac.sampleRate * 0.06), b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 6);
+    const s = ac.createBufferSource(); s.buffer = b;
+    const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 900;
+    const g = ac.createGain(); g.gain.value = 0.7;
+    s.connect(hp); hp.connect(g); g.connect(ac.destination); s.start(t);
+  };
+  function makeBurst() {
+    const n = Math.round(ac.sampleRate * 0.028), b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+    return b;
+  }
+  // 초당 24번, 필름이 한 칸씩 넘어가는 소리(차르르)
+  function click(t, loud) {
+    const s = ac.createBufferSource(); s.buffer = burst; s.playbackRate.value = 0.85 + Math.random() * 0.3;
+    const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1800 + Math.random() * 900; bp.Q.value = 1.4;
+    const g = ac.createGain(); g.gain.value = loud;
+    s.connect(bp); bp.connect(g); g.connect(master); s.start(t);
+  }
+  function schedule() {
+    while (next < ac.currentTime + 0.12) {
+      click(next + (Math.random() - 0.5) * 0.004, tick % 2 ? 0.32 : 0.55);
+      tick++; next += 1 / 24;
+    }
+  }
+  function start() {
+    ac = ac || new AC(); ac.resume(); burst = burst || makeBurst();
+    master = ac.createGain(); master.gain.setValueAtTime(0, ac.currentTime);
+    master.gain.linearRampToValueAtTime(0.35, ac.currentTime + 0.8); master.connect(ac.destination);
+    // 모터 웅웅거림
+    hum = [55, 110].map((f, i) => {
+      const o = ac.createOscillator(); o.type = i ? 'triangle' : 'sawtooth'; o.frequency.value = f;
+      const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 240;
+      const g = ac.createGain(); g.gain.value = i ? 0.025 : 0.04;
+      o.connect(lp); lp.connect(g); g.connect(master); o.start(); return o;
+    });
+    next = ac.currentTime + 0.05; timer = setInterval(schedule, 25); schedule();
+  }
+  function stop() {
+    clearInterval(timer); const m = master, hs = hum;
+    m.gain.cancelScheduledValues(ac.currentTime); m.gain.setValueAtTime(m.gain.value, ac.currentTime);
+    m.gain.linearRampToValueAtTime(0, ac.currentTime + 0.4);
+    setTimeout(() => { hs.forEach(o => o.stop()); m.disconnect(); }, 500);
+  }
+  btn.addEventListener('click', () => {
+    on = !on; on ? start() : stop();
+    if (on && window.replayCountdown) window.replayCountdown();
+    btn.setAttribute('aria-pressed', on); btn.querySelector('b').textContent = on ? '영사기 소리 끄기' : '영사기 소리 켜기';
+  });
+  document.addEventListener('visibilitychange', () => { if (on && ac) document.hidden ? ac.suspend() : ac.resume(); });
+})();
+
+/* 필름 카운트다운 · 3, 2, 1을 세고 SCENE 01로. 소리가 켜져 있으면 숫자마다 띡 */
+(() => {
+  const cue = document.getElementById('cue'); if (!cue) return;
+  const num = cue.querySelector('.num'), lead = cue.querySelector('.leader');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let run = 0;
+  const finish = () => { lead.style.setProperty('--p', 0); num.textContent = '↓'; cue.classList.add('done'); };
+  function play(delay) {
+    const id = ++run, per = 900, t0 = performance.now() + delay; let last = -1;
+    cue.classList.remove('done'); num.textContent = '3'; lead.style.setProperty('--p', 0);
+    (function tick(now) {
+      if (id !== run) return;
+      const e = now - t0;
+      if (e < 0) { requestAnimationFrame(tick); return; }
+      const i = Math.floor(e / per);
+      if (i >= 3) { finish(); return; }
+      if (i !== last) { last = i; if (window.leaderBeep) window.leaderBeep(i); }
+      num.textContent = 3 - i; lead.style.setProperty('--p', still ? 0 : ((e % per) / per).toFixed(3));
+      requestAnimationFrame(tick);
+    })(performance.now());
+  }
+  window.replayCountdown = () => play(250);
+  if (still) finish(); else play(700);
+})();
+
+/* 슬레이트 · 처음엔 주차만. 누르면 막대가 딱 닫히고 그 주의 안내가 펼쳐진다. 소리가 켜져 있으면 딱 소리도 */
+(() => {
+  const row = document.querySelector('.slaterow'); if (!row) return;
+  document.documentElement.classList.add('js');
+  const tabs = [...row.querySelectorAll('.slate')], panels = tabs.map(b => document.getElementById(b.getAttribute('aria-controls')));
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let cur = -1, timer = 0;
+  function pick(i, focus, user) {
+    if (i === cur) return;
+    clearTimeout(timer);
+    tabs.forEach((b, k) => { b.classList.toggle('on', k === i); b.setAttribute('aria-selected', k === i); b.tabIndex = k === i ? 0 : -1; });
+    panels.forEach(pn => pn.classList.remove('show'));
+    if (focus) tabs[i].focus();
+    if (window.slateClap) setTimeout(() => window.slateClap(user), still ? 0 : 130);
+    timer = setTimeout(() => panels[i].classList.add('show'), still ? 0 : 170);
+    cur = i;
+  }
+  tabs.forEach((b, i) => {
+    b.tabIndex = -1;
+    b.addEventListener('click', () => pick(i, false, true));
+    b.addEventListener('keydown', (e) => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (d) { e.preventDefault(); pick((cur + d + tabs.length) % tabs.length, true, true); }
+    });
+  });
+  tabs[0].tabIndex = 0;
+  // 칸이 화면에 처음 들어오면 첫 슬레이트가 저절로 딱
+  if ('IntersectionObserver' in window && !still) {
+    const io = new IntersectionObserver(([en]) => { if (en.isIntersecting) { io.disconnect(); setTimeout(() => { if (cur < 0) pick(0); }, 350); } }, { threshold: 0.5 });
+    io.observe(row);
+  } else pick(0);
+})();
+
+/* 「네가 정해」 자막 · 영상 파일은 그대로 두고 대사 자막만 얹는다. 크메르어는 인스타판 자막에서 옮김 */
+(() => {
+  const v = document.querySelector('.showreel video'); if (!v || !window.VTTCue) return;
+  // [시작, 끝, English, ខ្មែរ, 한국어]. 영어·크메르어가 비어 있는 줄은 영상에 이미 영어로 박혀 있는 첫·끝 자막이다
+  const lines = [
+    [0.23, 3.86, '', '', '이건 누구의 이야기도 아닙니다.\n우리 모두의 이야기입니다.'],
+    [4.0, 7.9, "It's time for dinner.", 'ដល់ពេលញ៉ាំបាយល្ងាចហើយ។', '저녁 먹을 시간이야.'],
+    [9.0, 13.9, 'You decide.', 'អ្នកសម្រេចចុះ!', '네가 정해.'],
+    [15.0, 19.9, 'Anything is fine with me.', 'ខ្ញុំយ៉ាងណាក៏បានដែរ។', '나는 아무거나 괜찮아.'],
+    [31.0, 34.9, 'I always give in.', 'ខ្ញុំតែងតែជាអ្នកចុះចាញ់។', '나는 늘 양보하잖아.'],
+    [36.0, 38.0, 'I always give in.', 'ខ្ញុំតែងតែជាអ្នកចុះចាញ់។', '나는 늘 양보하잖아.'],
+    [48.9, 51.2, 'What if it were like this instead?', 'បើសិនជាបែបនេះវិញ?', '이번엔 이렇게 해 보면?'],
+    [53.0, 54.7, 'You decide.', 'អ្នកសម្រេចចុះ!', '네가 정해.'],
+    [55.0, 56.9, 'I want noodles.', 'ខ្ញុំចង់ញ៉ាំមី។', '나는 국수 먹고 싶어.'],
+    [58.0, 59.7, 'What do you want to eat?', 'ចុះអ្នកចង់ញ៉ាំអ្វី?', '너는 뭐 먹고 싶어?'],
+    [60.0, 62.4, 'I want rice.', 'ខ្ញុំចង់ញ៉ាំបាយ។', '나는 밥 먹고 싶어.'],
+    [74.37, 75.87, '', '', '양보는 쉽다.'],
+    [75.87, 77.53, '', '', '원하는 것을 말하는 것이 어렵다.'],
+    [77.53, 79.13, '', '', '오늘 나는 무엇을 원하는지 말했나?']
+  ];
+  const tr = { en: v.addTextTrack('subtitles', 'English', 'en'), km: v.addTextTrack('subtitles', 'ខ្មែរ', 'km'), ko: v.addTextTrack('subtitles', '한국어', 'ko') };
+  lines.forEach(([a, b, en, km, ko]) => {
+    if (en) tr.en.addCue(new VTTCue(a, b, en));
+    if (km) tr.km.addCue(new VTTCue(a, b, km));
+    if (ko) tr.ko.addCue(new VTTCue(a, b, ko));
+  });
+  const btns = document.querySelectorAll('.showreel .cc button');
+  function use(k) {
+    Object.keys(tr).forEach(n => { tr[n].mode = n === k ? 'showing' : 'disabled'; });
+    btns.forEach(b => b.setAttribute('aria-pressed', b.dataset.cc === k));
+  }
+  btns.forEach(b => b.addEventListener('click', () => use(b.dataset.cc)));
+  use('ko');
+})();
+</script>
+</body>
+</html>
