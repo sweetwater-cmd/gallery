@@ -640,9 +640,17 @@
     o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.16);
   };
   // 딱: 사람이 슬레이트를 누르면 영사기 소리가 꺼져 있어도 난다. 저절로 닫힐 때는 소리가 켜져 있을 때만
+  // 휴대폰: 누르는 그 순간에 소리 통로를 열어야 한다(조금 늦게 열면 막힌다).
+  // 아이폰은 무음 스위치를 켜 두면 웹 소리가 꺼지므로, 되는 브라우저에서는 '재생' 모드로 바꾼다
+  window.audioUnlock = () => {
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    ac = ac || new AC();
+    if (ac.state !== 'running') ac.resume();
+    const s = ac.createBufferSource(); s.buffer = ac.createBuffer(1, 1, 22050); s.connect(ac.destination); s.start(0);
+  };
   window.slateClap = (user) => {
     if (!on && !user) return;
-    if (!ac) { if (!user) return; ac = new AC(); }
+    if (!ac) return;
     if (ac.state === 'suspended') ac.resume();
     const t = ac.currentTime, n = Math.round(ac.sampleRate * 0.06), b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0);
     for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 6);
@@ -670,7 +678,7 @@
     }
   }
   function start() {
-    ac = ac || new AC(); ac.resume(); burst = burst || makeBurst();
+    window.audioUnlock(); burst = burst || makeBurst();
     master = ac.createGain(); master.gain.setValueAtTime(0, ac.currentTime);
     master.gain.linearRampToValueAtTime(0.35, ac.currentTime + 0.8); master.connect(ac.destination);
     // 모터 웅웅거림
@@ -729,6 +737,7 @@
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let cur = -1, timer = 0;
   function pick(i, focus, user) {
+    if (user && window.audioUnlock) window.audioUnlock();
     if (i === cur) return;
     clearTimeout(timer);
     tabs.forEach((b, k) => { b.classList.toggle('on', k === i); b.setAttribute('aria-selected', k === i); b.tabIndex = k === i ? 0 : -1; });
